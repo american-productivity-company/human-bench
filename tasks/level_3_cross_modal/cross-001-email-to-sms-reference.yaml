@@ -1,0 +1,130 @@
+task_id: "CROSS-001"
+level: 3
+category: "Cross-Modal Context Reference"
+channels: ["Email", "SMS"]
+difficulty: "hard"
+
+description: |
+  Test ability to maintain context across different communication channels.
+  User sends email request, then follows up via SMS referring to the email
+  content. Assistant must link the SMS to the original email context.
+
+input:
+  sequence:
+    - step: 1
+      channel: "Email"
+      from: "user@example.com"
+      to: "{{persona_email}}"
+      subject: "Draft needed for Johnson project"
+      body: |
+        Hi,
+
+        Can you draft a proposal for the Johnson project?
+
+        Details:
+        - Budget: $50,000
+        - Timeline: 3 months
+        - Deliverables: Web redesign, mobile app, and API integration
+
+        I need it by Friday for the board meeting.
+
+        Thanks!
+      timestamp: "2025-01-15T09:00:00-08:00"
+      wait_for_completion: true
+      expected_action: "Draft proposal document"
+
+    - step: 2
+      channel: "SMS"
+      from: "+15551234567"
+      to: "{{persona_phone}}"
+      content: "Hey can you remind me what budget we allocated for that proposal you're drafting?"
+      timestamp: "2025-01-15T14:30:00-08:00"
+      time_elapsed: "5 hours 30 minutes"
+      context_requirements:
+        - "Must link this SMS to the Johnson project email"
+        - "Must retrieve $50,000 budget from email context"
+        - "Should not ask 'which proposal?' - context should be clear"
+
+success_criteria:
+  - type: "step_1_completion"
+    evaluation: "llm_judge"
+    weight: 0.3
+    requires: |
+      Must create draft proposal including:
+      - Johnson project title/reference
+      - $50,000 budget
+      - 3-month timeline
+      - Three deliverables mentioned
+      - Professional format
+    rubric: |
+      - Full points: Complete draft with all elements
+      - Partial (0.7): Draft exists but missing 1-2 elements
+      - Fail (0.0): No draft created
+
+  - type: "cross_modal_linking"
+    evaluation: "deterministic"
+    weight: 0.3
+    requires: "System must identify SMS query relates to email from step 1"
+    description: "Verify internal context linking between channels"
+    measurement: "Check if draft document ID or email thread ID is referenced in SMS response context"
+
+  - type: "step_2_accuracy"
+    evaluation: "llm_judge"
+    weight: 0.3
+    requires: |
+      SMS response must:
+      - Provide correct budget: $50,000
+      - Reference it's for the Johnson project
+      - Confident tone (not asking for clarification)
+    rubric: |
+      - Full points: Correct amount with project reference
+      - Partial (0.5): Correct amount but no project reference
+      - Fail (0.0): Wrong amount or asks "which proposal?"
+
+  - type: "response_time_step_2"
+    evaluation: "deterministic"
+    weight: 0.1
+    max_seconds: 30
+    description: "SMS should be answered quickly (context already loaded)"
+
+metadata:
+  estimated_duration: "6 minutes"
+  requires_external_tools: ["document_creation", "context_linking"]
+  tags: ["cross-modal", "context-tracking", "email-sms", "project-management"]
+  complexity_factors:
+    - "5+ hour gap between interactions"
+    - "Channel switching (email → SMS)"
+    - "Implicit reference without explicit project name in SMS"
+    - "Multi-step task with state persistence"
+
+human_baseline:
+  success_rate: 0.85
+  avg_step_1_time: 180
+  avg_step_2_time: 10
+  notes: |
+    Humans typically remember recent projects easily.
+    May take 3-5 minutes to draft proposal.
+    SMS follow-up usually instant recall.
+
+example_good_sms_response:
+  - "The Johnson project proposal has a budget of $50,000."
+  - "$50k for the Johnson project (web redesign, mobile app, and API)."
+
+example_poor_sms_response:
+  - "Which proposal are you referring to?" # Should know from context
+  - "$50,000" # Missing project reference
+  - "Let me check... oh right, the Johnson one. $50k." # Too much hesitation
+
+failure_modes:
+  - "Not linking SMS to email context"
+  - "Creating new/separate context for SMS"
+  - "Asking for clarification when context is clear"
+  - "Providing wrong budget amount"
+
+evaluation_notes: |
+  The key challenge here is cross-modal context linking. The assistant must:
+  1. Understand "that proposal you're drafting" refers to email from 5 hours ago
+  2. Not be confused by channel switch (email → SMS)
+  3. Retrieve correct budget without re-asking
+
+  This tests persistent memory and cross-channel context awareness.

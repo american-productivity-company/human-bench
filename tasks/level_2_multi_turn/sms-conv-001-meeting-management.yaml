@@ -1,0 +1,119 @@
+task_id: "SMS-CONV-001"
+level: 2
+category: "Multi-Turn Task Management"
+channel: "SMS"
+difficulty: "medium"
+
+description: |
+  Test ability to maintain context across multiple SMS turns while managing
+  calendar operations. Requires understanding implicit references and
+  executing multiple actions.
+
+input:
+  conversation:
+    - turn: 1
+      from: "+15551234567"
+      to: "{{persona_phone}}"
+      content: "Do I have any meetings tomorrow?"
+      timestamp: "2025-01-15T16:30:00-08:00"
+
+    - turn: 2
+      from: "+15551234567"
+      to: "{{persona_phone}}"
+      content: "Move the 2pm to Thursday"
+      timestamp: "2025-01-15T16:32:00-08:00"
+      wait_for_response: true
+      context_requirements:
+        - "Must identify which meeting is 'the 2pm'"
+        - "Must understand 'Thursday' refers to next Thursday (Jan 18)"
+
+    - turn: 3
+      from: "+15551234567"
+      to: "{{persona_phone}}"
+      content: "Who's attending?"
+      timestamp: "2025-01-15T16:34:00-08:00"
+      wait_for_response: true
+      context_requirements:
+        - "Must understand 'Who's attending' refers to the rescheduled meeting"
+
+expected_context:
+  current_date: "2025-01-15"  # Wednesday
+  tomorrow_date: "2025-01-16"  # Thursday
+  next_thursday: "2025-01-18"
+
+  calendar_state:
+    tomorrow_meetings:
+      - title: "Team Standup"
+        time: "09:00"
+        attendees: ["alice@example.com", "bob@example.com"]
+      - title: "Product Review"
+        time: "14:00"  # The 2pm meeting
+        attendees: ["carol@example.com", "david@example.com", "eve@example.com"]
+      - title: "1:1 with Manager"
+        time: "16:00"
+        attendees: ["manager@example.com"]
+
+success_criteria:
+  - type: "turn_1_response"
+    evaluation: "llm_judge"
+    weight: 0.25
+    requires: |
+      Must list all 3 meetings for tomorrow (Jan 16):
+      - Team Standup at 9:00 AM
+      - Product Review at 2:00 PM
+      - 1:1 with Manager at 4:00 PM
+    rubric: |
+      - Full points: All 3 meetings with times
+      - Partial (0.6): 2-3 meetings but missing times
+      - Fail (0.0): Doesn't query or list meetings
+
+  - type: "turn_2_context_resolution"
+    evaluation: "deterministic"
+    weight: 0.2
+    requires: "Must identify 'the 2pm' as Product Review meeting"
+    description: "Verify correct meeting was selected for rescheduling"
+
+  - type: "turn_2_action_execution"
+    evaluation: "deterministic"
+    weight: 0.25
+    requires: |
+      Must successfully reschedule Product Review:
+      - From: Jan 16 at 14:00
+      - To: Jan 18 at 14:00 (same time, different day)
+    description: "Verify calendar update API was called correctly"
+
+  - type: "turn_3_context_retention"
+    evaluation: "llm_judge"
+    weight: 0.3
+    requires: |
+      Must provide attendee list for the rescheduled meeting:
+      - Carol, David, and Eve (or email addresses)
+      - Should reference it's the Product Review meeting
+    rubric: |
+      - Full points: All 3 attendees listed
+      - Partial (0.6): 2 attendees listed
+      - Fail (0.0): Wrong meeting or no attendees
+
+metadata:
+  estimated_duration: "45s"
+  requires_external_tools: ["calendar_read", "calendar_update"]
+  tags: ["calendar", "multi-turn", "context-tracking", "implicit-reference"]
+  complexity_factors:
+    - "Implicit reference resolution ('the 2pm')"
+    - "Relative date understanding ('Thursday')"
+    - "Cross-turn context ('Who's attending' = rescheduled meeting)"
+
+human_baseline:
+  success_rate: 0.88
+  avg_response_time: 35
+  notes: "Humans occasionally ask for clarification on ambiguous references"
+
+context_tracking_requirements:
+  turn_1_to_2: "Remember which meetings exist tomorrow to identify 'the 2pm'"
+  turn_2_to_3: "Remember which meeting was just rescheduled"
+
+failure_modes:
+  - "Asking 'which meeting?' when context is clear"
+  - "Moving wrong meeting"
+  - "Providing attendees for original meeting instead of rescheduled"
+  - "Not understanding 'Thursday' means next Thursday"
