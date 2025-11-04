@@ -1,0 +1,145 @@
+task_id: "PROJECT-001"
+level: 6
+category: "Conference Planning"
+channels: ["Email", "SMS", "Voice"]
+duration: "30 days simulated"
+difficulty: "extreme"
+
+description: |
+  Test long-term project management for company conference with multiple
+  vendors, budgets, and coordination over 30 days.
+
+input:
+  initial_request:
+    channel: "Email"
+    from: "user@example.com"
+    to: "{{persona_email}}"
+    subject: "Company offsite planning"
+    body: |
+      We're planning our annual company offsite for April 15-17 (90 days from now).
+
+      ~150 people in Austin, TX.
+
+      Need:
+      - Venue with A/V
+      - Hotel blocks
+      - Catering (3 dinners, 3 lunches)
+      - Transportation from airport
+      - Team building activities
+
+      Budget: $180k total
+
+      Please coordinate everything!
+    timestamp: "2025-01-15T09:00:00-08:00"
+
+  interactions:
+    - day: 1
+      channel: "Email"
+      content: "Can you send me 3 venue options by end of week?"
+
+    - day: 5
+      channel: "Slack"
+      content: "What's the status on venues?"
+
+    - day: 8
+      channel: "Email"
+      content: "Let's book the Austin Convention Center option. What's next?"
+
+    - day: 12
+      channel: "SMS"
+      content: "Have you booked the hotel blocks yet?"
+
+    - day: 15
+      channel: "Voice"
+      transcript: "What's our total budget spent so far?"
+
+    - day: 20
+      channel: "Email"
+      content: "Can you add a happy hour on day 1 to the catering?"
+
+    - day: 25
+      channel: "SMS"
+      content: "Send me a complete status update"
+
+    - day: 30
+      channel: "Email"
+      content: "Final check - what's still outstanding?"
+
+success_criteria:
+  - type: "project_initialization"
+    evaluation: "llm_judge"
+    weight: 0.15
+    requires: |
+      Day 1 response should:
+      - Break down requirements
+      - Create project plan
+      - Start venue research
+
+  - type: "milestone_tracking"
+    evaluation: "deterministic"
+    weight: 0.25
+    requires: |
+      Must track:
+      - Venue booking (day 8)
+      - Hotel blocks (by day 12)
+      - Catering arrangements
+      - Transportation coordination
+      - Activities booking
+
+  - type: "budget_management"
+    evaluation: "deterministic"
+    weight: 0.2
+    requires: |
+      Must maintain running budget:
+      - Track all commitments
+      - Alert if approaching $180k limit
+      - Provide accurate totals on day 15
+
+  - type: "cross_channel_coherence"
+    evaluation: "llm_judge"
+    weight: 0.2
+    requires: |
+      Across all 30 days and channels:
+      - Consistent project context
+      - No contradictory information
+      - Smooth context transfers
+    rubric: |
+      - Full: Perfect coherence, no confusion
+      - Partial (0.7): Minor inconsistencies
+      - Partial (0.4): Some context loss
+      - Fail: Major confusion or contradictions
+
+  - type: "scope_management"
+    evaluation: "llm_judge"
+    weight: 0.2
+    requires: |
+      Must handle:
+      - Scope addition (happy hour on day 20)
+      - Budget impact communication
+      - Timeline adjustments
+    rubric: |
+      - Full: Smooth scope change handling
+      - Partial (0.6): Handled but disorganized
+      - Fail: Forgot original scope
+
+metadata:
+  estimated_duration: "30 days simulated"
+  requires_external_tools: ["vendor_coordination", "budget_tracking", "calendar", "long_term_memory"]
+  tags: ["project-management", "long-term", "multi-vendor", "budget", "event-planning"]
+
+human_baseline:
+  success_rate: 0.55
+  notes: |
+    Humans typically:
+    - Use project management tools
+    - Maintain spreadsheets
+    - Set reminders
+    - May miss some follow-ups
+
+complexity_factors:
+  - "30-day duration"
+  - "Multiple vendors"
+  - "Budget constraints"
+  - "Scope changes"
+  - "Cross-channel coordination"
+  - "150-person scale"

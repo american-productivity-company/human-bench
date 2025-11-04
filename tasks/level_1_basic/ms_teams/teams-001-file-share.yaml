@@ -1,0 +1,52 @@
+task_id: "TEAMS-001"
+level: 1
+category: "File Sharing"
+channel: "MS Teams"
+difficulty: "medium"
+
+description: |
+  Test MS Teams file sharing with proper channel/permissions.
+
+input:
+  from: "user@company.com"
+  to: "{{persona_teams_handle}}"
+  channel_type: "DM"
+  content: "Can you share the Q4 budget spreadsheet with the finance channel?"
+  timestamp: "2025-01-15T10:15:00-08:00"
+
+expected_context:
+  file_location: "Documents/Finance/Q4_Budget_2024.xlsx"
+  target_channel: "#finance"
+  file_size: "2.4 MB"
+
+success_criteria:
+  - type: "response_time"
+    max_seconds: 45
+    weight: 0.2
+
+  - type: "action_execution"
+    evaluation: "deterministic"
+    weight: 0.5
+    requires: |
+      Must:
+      - Locate Q4 budget file
+      - Share to #finance channel
+      - Verify permissions
+
+  - type: "confirmation"
+    evaluation: "llm_judge"
+    weight: 0.3
+    requires: |
+      Confirm:
+      - File name and location
+      - Channel shared to
+      - Link to file
+
+metadata:
+  estimated_duration: "30s"
+  requires_external_tools: ["teams_api", "file_system"]
+  tags: ["teams", "file-sharing", "permissions"]
+
+human_baseline:
+  success_rate: 0.88
+  avg_response_time: 35

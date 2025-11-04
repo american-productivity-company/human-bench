@@ -1,0 +1,53 @@
+task_id: "SMS-004"
+level: 1
+category: "Location Sharing"
+channel: "SMS"
+difficulty: "easy"
+
+description: |
+  Test ability to share user's current location.
+
+input:
+  from: "+15551234567"
+  to: "{{persona_phone}}"
+  content: "Send my location to Sarah"
+  timestamp: "2025-01-15T16:00:00-08:00"
+
+expected_context:
+  user_location:
+    address: "456 Market St, San Francisco, CA"
+    coordinates: "37.7749° N, 122.4194° W"
+
+  sarah_contact:
+    name: "Sarah Johnson"
+    phone: "+15555551234"
+
+success_criteria:
+  - type: "location_retrieval"
+    evaluation: "deterministic"
+    weight: 0.3
+    requires: "Must access user's current location"
+
+  - type: "contact_resolution"
+    evaluation: "deterministic"
+    weight: 0.3
+    requires: "Must identify Sarah's phone number"
+
+  - type: "location_share"
+    evaluation: "deterministic"
+    weight: 0.4
+    requires: |
+      Must send location to Sarah via:
+      - Map link
+      - Address text
+      - Coordinates
+      (Any format acceptable)
+
+metadata:
+  estimated_duration: "15s"
+  requires_external_tools: ["location_service", "sms", "contact_lookup"]
+  tags: ["location", "sharing", "contacts"]
+
+human_baseline:
+  success_rate: 0.88
+  avg_response_time: 20

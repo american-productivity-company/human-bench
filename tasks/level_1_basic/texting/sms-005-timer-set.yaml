@@ -1,0 +1,41 @@
+task_id: "SMS-005"
+level: 1
+category: "Timer/Alarm"
+channel: "SMS"
+difficulty: "easy"
+
+description: |
+  Test timer or alarm setting functionality.
+
+input:
+  from: "+15551234567"
+  to: "{{persona_phone}}"
+  content: "Set a timer for 25 minutes"
+  timestamp: "2025-01-15T14:30:00-08:00"
+
+success_criteria:
+  - type: "response_time"
+    max_seconds: 10
+    weight: 0.3
+
+  - type: "timer_action"
+    evaluation: "deterministic"
+    weight: 0.5
+    requires: |
+      Must set timer for:
+      - 25 minutes
+      - Starting from message timestamp
+
+  - type: "confirmation"
+    evaluation: "llm_judge"
+    weight: 0.2
+    requires: "Confirm timer set with end time"
+
+metadata:
+  estimated_duration: "8s"
+  requires_external_tools: ["timer_service"]
+  tags: ["timer", "alarm", "time-management"]
+
+human_baseline:
+  success_rate: 0.96
+  avg_response_time: 7

@@ -1,0 +1,75 @@
+task_id: "CROSS-SMS-CALL-001"
+level: 4
+category: "SMS to Call Context Transfer"
+channels: ["SMS", "Voice"]
+difficulty: "hard"
+
+description: |
+  Test context transfer from SMS to voice call - user texts about an issue,
+  then calls to discuss it. Assistant must link the call to the SMS context.
+
+input:
+  sequence:
+    - step: 1
+      channel: "SMS"
+      from: "+15551234567"
+      to: "{{persona_phone}}"
+      content: "The website is down - customers are complaining. This is urgent."
+      timestamp: "2025-01-15T14:30:00-08:00"
+
+    - step: 2
+      channel: "Voice"
+      from: "+15551234567"
+      to: "{{persona_phone}}"
+      transcript: "Hey, it's me. About that website issue - what's the status?"
+      timestamp: "2025-01-15T14:33:00-08:00"
+      time_elapsed: "3 minutes"
+      audio_duration_seconds: 3.5
+
+success_criteria:
+  - type: "sms_response"
+    evaluation: "llm_judge"
+    weight: 0.2
+    requires: |
+      SMS response should:
+      - Acknowledge urgency
+      - Indicate investigating
+      - May ask for details
+
+  - type: "cross_modal_linking"
+    evaluation: "deterministic"
+    weight: 0.3
+    requires: "System must identify call relates to SMS about website"
+    description: "Verify internal context linking"
+
+  - type: "voice_response_context"
+    evaluation: "llm_judge"
+    weight: 0.4
+    requires: |
+      Voice response must:
+      - Reference the website outage (not ask "what issue?")
+      - Provide status update
+      - Show continuity from SMS
+    rubric: |
+      - Full: Seamless context, detailed update
+      - Partial (0.5): Recognizes issue but asks for clarification
+      - Fail: Doesn't connect to SMS
+
+  - type: "response_time_voice"
+    evaluation: "deterministic"
+    weight: 0.1
+    max_seconds: 15
+
+metadata:
+  estimated_duration: "20s"
+  requires_external_tools: ["context_linking"]
+  tags: ["cross-modal", "sms-call", "urgent", "context-transfer"]
+
+human_baseline:
+  success_rate: 0.78
+  avg_response_time: 12
+
+context_requirements:
+  - "Remember website down issue from SMS"
+  - "Transfer urgency level to call"
+  - "Maintain investigation state"

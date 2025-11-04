@@ -1,0 +1,93 @@
+task_id: "TEAM-001"
+level: 8
+category: "Task Delegation"
+channels: ["Email", "Slack"]
+difficulty: "hard"
+
+description: |
+  Test ability to delegate task from one team member to another based
+  on expertise and availability.
+
+input:
+  sequence:
+    - step: 1
+      channel: "Email"
+      from: "john@company.com"  # User/team lead
+      to: "{{persona_email}}"
+      subject: "Need someone to review PR #456"
+      body: |
+        Hey, we have PR #456 that needs a security review before shipping.
+        Can you find someone on the team to do it today?
+      timestamp: "2025-01-15T10:00:00-08:00"
+
+expected_context:
+  team_members:
+    - name: "Alice Chen"
+      email: "alice@company.com"
+      expertise: ["frontend", "UI"]
+      availability_today: false  # In meetings all day
+
+    - name: "Bob Martinez"
+      email: "bob@company.com"
+      expertise: ["backend", "security"]
+      availability_today: true  # Available 2-4pm
+
+    - name: "Carol Davis"
+      email: "carol@company.com"
+      expertise: ["security", "infrastructure"]
+      availability_today: true  # Available morning
+
+  pr_details:
+    number: 456
+    type: "security update"
+    urgency: "today"
+
+success_criteria:
+  - type: "expertise_matching"
+    evaluation: "deterministic"
+    weight: 0.3
+    requires: |
+      Must identify team members with security expertise:
+      - Bob (backend, security)
+      - Carol (security, infrastructure)
+
+      Must NOT choose Alice (no security expertise)
+
+  - type: "availability_check"
+    evaluation: "deterministic"
+    weight: 0.3
+    requires: "Must check calendars and find available person"
+
+  - type: "delegation_execution"
+    evaluation: "llm_judge"
+    weight: 0.3
+    requires: |
+      Must:
+      - Reach out to Bob or Carol
+      - Explain the task (PR #456 security review)
+      - Mention urgency (today)
+      - Confirm acceptance
+    rubric: |
+      - Full: Delegates to right person with all details
+      - Partial (0.6): Right person but missing details
+      - Fail: Wrong person or no delegation
+
+  - type: "feedback_loop"
+    evaluation: "llm_judge"
+    weight: 0.1
+    requires: "Update John on who's assigned"
+
+metadata:
+  estimated_duration: "90s"
+  requires_external_tools: ["calendar_read", "team_directory", "email", "slack"]
+  tags: ["team", "delegation", "expertise-matching", "scheduling"]
+
+human_baseline:
+  success_rate: 0.78
+  avg_response_time: 120
+
+complexity_factors:
+  - "Multi-person coordination"
+  - "Expertise matching"
+  - "Availability checking"
+  - "Communication with multiple parties"

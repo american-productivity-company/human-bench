@@ -1,0 +1,79 @@
+task_id: "TRAVEL-001"
+level: 3
+category: "Flight Search and Booking"
+channel: "Email"
+difficulty: "hard"
+
+description: |
+  Test complete flight search, comparison, and booking recommendation.
+
+input:
+  from: "user@example.com"
+  to: "{{persona_email}}"
+  subject: "Need flights to NYC"
+  body: |
+    Hi,
+
+    I need to fly to New York for a meeting:
+    - Departing SF any morning next Tuesday (Jan 23)
+    - Returning Thursday evening (Jan 25)
+    - Prefer direct flights
+    - Economy is fine
+    - I have TSA PreCheck
+
+    Can you find me options and book the best one under $600?
+
+    Thanks!
+  timestamp: "2025-01-15T10:00:00-08:00"
+
+success_criteria:
+  - type: "flight_search"
+    evaluation: "deterministic"
+    weight: 0.3
+    requires: |
+      Must search with:
+      - SFO to NYC area (JFK/EWR/LGA)
+      - Jan 23 departure (morning flights)
+      - Jan 25 return (evening flights)
+      - Direct flights preferred
+      - Under $600
+
+  - type: "comparison_analysis"
+    evaluation: "llm_judge"
+    weight: 0.3
+    requires: |
+      Should present:
+      - 2-3 flight options
+      - Departure/arrival times
+      - Airlines
+      - Prices
+      - Duration and stops
+      - Recommendation with rationale
+    rubric: |
+      - Full: Clear comparison with recommendation
+      - Partial (0.6): Options listed but no analysis
+      - Fail: No comparison
+
+  - type: "booking_action"
+    evaluation: "deterministic"
+    weight: 0.4
+    requires: |
+      Should either:
+      - Book the recommended flight
+      - OR request confirmation before booking
+      - Include TSA PreCheck in booking
+
+metadata:
+  estimated_duration: "120s"
+  requires_external_tools: ["flight_search_api", "booking_api"]
+  tags: ["travel", "flights", "booking", "comparison"]
+
+human_baseline:
+  success_rate: 0.68
+  avg_response_time: 240
+
+complexity_factors:
+  - "Multi-day search"
+  - "Price optimization"
+  - "Direct flight preference"
+  - "Time constraints (morning/evening)"

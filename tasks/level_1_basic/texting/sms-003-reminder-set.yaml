@@ -1,0 +1,54 @@
+task_id: "SMS-003"
+level: 1
+category: "Task Creation"
+channel: "SMS"
+difficulty: "easy"
+
+description: |
+  Test basic task/reminder creation via SMS.
+
+input:
+  from: "+15551234567"
+  to: "{{persona_phone}}"
+  content: "Remind me to call dentist tomorrow at 2pm"
+  timestamp: "2025-01-15T18:30:00-08:00"
+
+expected_context:
+  current_date: "2025-01-15"
+  reminder_date: "2025-01-16"
+  reminder_time: "14:00"
+
+success_criteria:
+  - type: "response_time"
+    max_seconds: 20
+    weight: 0.2
+
+  - type: "action_execution"
+    evaluation: "deterministic"
+    weight: 0.5
+    requires: |
+      Must create reminder with:
+      - Task: "call dentist"
+      - Date: 2025-01-16
+      - Time: 14:00
+
+  - type: "confirmation_message"
+    evaluation: "llm_judge"
+    weight: 0.3
+    requires: |
+      Should confirm:
+      - What: call dentist
+      - When: tomorrow at 2pm
+    rubric: |
+      - Full: Clear confirmation with details
+      - Partial (0.5): Confirms but vague
+      - Fail: No confirmation
+
+metadata:
+  estimated_duration: "10s"
+  requires_external_tools: ["task_creation"]
+  tags: ["reminder", "task-management", "time-parsing"]
+
+human_baseline:
+  success_rate: 0.94
+  avg_response_time: 12

@@ -1,0 +1,54 @@
+task_id: "EMAIL-005"
+level: 1
+category: "RSVP Management"
+channel: "Email"
+difficulty: "easy"
+
+description: |
+  Test calendar event RSVP on user's behalf.
+
+input:
+  from: "events@company.com"
+  to: "{{persona_email}}"
+  subject: "Company Holiday Party - December 20th"
+  body: |
+    You're invited to our annual holiday party!
+
+    Date: December 20, 2025
+    Time: 6:00 PM
+    Location: Grand Ballroom
+
+    Please RSVP by clicking: [Accept] [Decline]
+  timestamp: "2025-01-15T09:00:00-08:00"
+
+success_criteria:
+  - type: "response_time"
+    max_seconds: 45
+    weight: 0.2
+
+  - type: "calendar_check"
+    evaluation: "deterministic"
+    weight: 0.4
+    requires: "Must check user's calendar for Dec 20, 6pm conflict"
+
+  - type: "rsvp_action"
+    evaluation: "llm_judge"
+    weight: 0.4
+    requires: |
+      Should either:
+      - RSVP accept if available
+      - OR ask user for preference
+      - Include reasoning
+    rubric: |
+      - Full: Appropriate action with reasoning
+      - Partial (0.6): Action without reasoning
+      - Fail: No action
+
+metadata:
+  estimated_duration: "30s"
+  requires_external_tools: ["calendar_read", "email_reply"]
+  tags: ["rsvp", "calendar", "events"]
+
+human_baseline:
+  success_rate: 0.90
+  avg_response_time: 40

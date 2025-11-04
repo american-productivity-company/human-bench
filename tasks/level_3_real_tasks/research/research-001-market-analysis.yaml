@@ -1,0 +1,72 @@
+task_id: "RESEARCH-001"
+level: 3
+category: "Market Research"
+channel: "Email"
+difficulty: "hard"
+
+description: |
+  Test research and synthesis capabilities for market analysis.
+
+input:
+  from: "user@example.com"
+  to: "{{persona_email}}"
+  subject: "Competitor analysis needed"
+  body: |
+    Hi,
+
+    Can you research our top 3 competitors in the project management software space?
+
+    For each, I need:
+    - Pricing tiers
+    - Key features
+    - Customer base size (if available)
+    - Recent funding/news
+
+    We're preparing for our board meeting next week.
+
+    Thanks!
+  timestamp: "2025-01-15T09:00:00-08:00"
+
+success_criteria:
+  - type: "research_depth"
+    evaluation: "llm_judge"
+    weight: 0.4
+    requires: |
+      Must research 3 competitors with:
+      - Company identification
+      - Pricing information
+      - Feature comparison
+      - Market position data
+      - Recent news
+    rubric: |
+      - Full: All 3 competitors, comprehensive data
+      - Partial (0.7): 3 competitors, some gaps
+      - Partial (0.4): 2 competitors or major gaps
+
+  - type: "synthesis_quality"
+    evaluation: "llm_judge"
+    weight: 0.4
+    requires: |
+      Should provide:
+      - Organized comparison format
+      - Key insights/patterns
+      - Board-ready presentation
+      - Citations/sources
+    rubric: |
+      - Full: Well-organized, insightful, actionable
+      - Partial (0.6): Data present but poor organization
+      - Fail: Raw data dump
+
+  - type: "response_time"
+    evaluation: "deterministic"
+    weight: 0.2
+    max_seconds: 300  # 5 minutes for comprehensive research
+
+metadata:
+  estimated_duration: "240s"
+  requires_external_tools: ["web_search", "data_aggregation"]
+  tags: ["research", "analysis", "competitive-intelligence"]
+
+human_baseline:
+  success_rate: 0.72
+  avg_response_time: 360

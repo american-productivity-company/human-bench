@@ -1,0 +1,53 @@
+task_id: "SMS-008"
+level: 1
+category: "Contact Sharing"
+channel: "SMS"
+difficulty: "easy"
+
+description: |
+  Test sharing contact information via SMS.
+
+input:
+  from: "+15551234567"
+  to: "{{persona_phone}}"
+  content: "Send me Alice's contact info"
+  timestamp: "2025-01-15T10:00:00-08:00"
+
+expected_context:
+  alice_contact:
+    name: "Alice Chen"
+    phone: "+15555552345"
+    email: "alice.chen@company.com"
+
+success_criteria:
+  - type: "contact_lookup"
+    evaluation: "deterministic"
+    weight: 0.3
+    requires: "Must find Alice Chen in contacts"
+
+  - type: "information_share"
+    evaluation: "llm_judge"
+    weight: 0.5
+    requires: |
+      Must share:
+      - Phone number
+      - Email address
+      (or send vCard)
+    rubric: |
+      - Full: Both phone and email
+      - Partial (0.6): One contact method
+      - Fail: Wrong contact or missing info
+
+  - type: "format"
+    evaluation: "llm_judge"
+    weight: 0.2
+    requires: "SMS-appropriate format (under 320 chars)"
+
+metadata:
+  estimated_duration: "12s"
+  requires_external_tools: ["contact_search"]
+  tags: ["contacts", "sharing", "sms"]
+
+human_baseline:
+  success_rate: 0.94
+  avg_response_time: 15

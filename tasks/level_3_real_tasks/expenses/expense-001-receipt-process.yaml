@@ -1,0 +1,70 @@
+task_id: "EXPENSE-001"
+level: 3
+category: "Expense Report Processing"
+channel: "Email"
+difficulty: "medium"
+
+description: |
+  Test expense processing from receipt image - extract info, categorize,
+  and submit to expense system.
+
+input:
+  from: "user@example.com"
+  to: "{{persona_email}}"
+  subject: "Expense - dinner receipt"
+  body: |
+    Please process this receipt and submit to Expensify.
+
+    This was a client dinner last Tuesday.
+  attachments:
+    - type: "image"
+      filename: "receipt.jpg"
+      contains:
+        restaurant: "Bella Italia"
+        date: "2025-01-08"
+        total: "$156.73"
+        items:
+          - "Pasta Carbonara x2"
+          - "Wine"
+          - "Tiramisu"
+  timestamp: "2025-01-15T10:00:00-08:00"
+
+success_criteria:
+  - type: "receipt_parsing"
+    evaluation: "deterministic"
+    weight: 0.3
+    requires: |
+      Must extract:
+      - Merchant: Bella Italia
+      - Date: 2025-01-08
+      - Amount: $156.73
+      - Category: Client Entertainment/Meals
+
+  - type: "expense_submission"
+    evaluation: "deterministic"
+    weight: 0.4
+    requires: |
+      Submit to Expensify with:
+      - Correct amount
+      - Correct date
+      - Proper category
+      - Receipt image attached
+      - Description: "Client dinner"
+
+  - type: "confirmation"
+    evaluation: "llm_judge"
+    weight: 0.3
+    requires: |
+      Email confirmation with:
+      - Amount processed
+      - Category assigned
+      - Submission status
+
+metadata:
+  estimated_duration: "45s"
+  requires_external_tools: ["ocr", "expense_api", "image_processing"]
+  tags: ["expenses", "ocr", "automation", "receipts"]
+
+human_baseline:
+  success_rate: 0.82
+  avg_response_time: 90

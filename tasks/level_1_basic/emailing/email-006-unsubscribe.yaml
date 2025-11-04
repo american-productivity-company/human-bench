@@ -1,0 +1,47 @@
+task_id: "EMAIL-006"
+level: 1
+category: "Email Management"
+channel: "Email"
+difficulty: "easy"
+
+description: |
+  Test unsubscribe action from unwanted emails.
+
+input:
+  from: "user@example.com"
+  to: "{{persona_email}}"
+  subject: "Re: Marketing emails"
+  body: "Can you unsubscribe me from those daily deal emails? They're annoying."
+  timestamp: "2025-01-15T08:30:00-08:00"
+
+expected_context:
+  recent_emails:
+    - from: "deals@shopping.com"
+      subject: "Daily Deal: 50% off!"
+      frequency: "daily"
+      has_unsubscribe_link: true
+
+success_criteria:
+  - type: "email_identification"
+    evaluation: "deterministic"
+    weight: 0.3
+    requires: "Must identify deals@shopping.com emails"
+
+  - type: "unsubscribe_action"
+    evaluation: "deterministic"
+    weight: 0.5
+    requires: "Must click unsubscribe link or process unsubscribe"
+
+  - type: "confirmation"
+    evaluation: "llm_judge"
+    weight: 0.2
+    requires: "Confirm unsubscribe action to user"
+
+metadata:
+  estimated_duration: "25s"
+  requires_external_tools: ["email_search", "web_interaction"]
+  tags: ["email-management", "unsubscribe", "automation"]
+
+human_baseline:
+  success_rate: 0.94
+  avg_response_time: 30

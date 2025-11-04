@@ -1,0 +1,141 @@
+task_id: "PROJECT-002"
+level: 6
+category: "Hiring Pipeline Management"
+channels: ["Email", "Slack"]
+duration: "45 days simulated"
+difficulty: "extreme"
+
+description: |
+  Test management of complete hiring process from job posting through offer.
+
+input:
+  initial_request:
+    channel: "Email"
+    from: "hiring.manager@example.com"
+    to: "{{persona_email}}"
+    subject: "Need to hire Senior Engineer"
+    body: |
+      We need to hire a Senior Backend Engineer ASAP.
+
+      Requirements:
+      - 5+ years Python/FastAPI
+      - Database design expertise
+      - Team leadership experience
+
+      Salary range: $150-180k
+      Target start: March 1 (45 days from now)
+
+      Can you manage the whole process?
+    timestamp: "2025-01-15T09:00:00-08:00"
+
+  interactions:
+    - day: 1
+      channel: "Email"
+      content: "Post the JD on LinkedIn and our careers page"
+
+    - day: 7
+      channel: "Slack"
+      content: "How many applicants so far?"
+
+    - day: 10
+      channel: "Email"
+      content: "Screen the top 10 and schedule phone screens"
+
+    - day: 15
+      channel: "Slack"
+      content: "Who passed phone screens?"
+
+    - day: 18
+      channel: "Email"
+      content: "Schedule onsite interviews for the 4 finalists"
+
+    - day: 25
+      channel: "Slack"
+      content: "Interview feedback summary please"
+
+    - day: 28
+      channel: "Email"
+      content: "Let's make an offer to Sarah Chen. $170k, standard benefits."
+
+    - day: 30
+      channel: "Slack"
+      content: "Did Sarah accept?"
+
+    - day: 35
+      channel: "Email"
+      content: "She countered at $180k. Should we accept?"
+
+    - day: 40
+      channel: "Email"
+      content: "Approved. Send final offer and start background check."
+
+success_criteria:
+  - type: "pipeline_management"
+    evaluation: "deterministic"
+    weight: 0.3
+    requires: |
+      Must track and execute:
+      - Job posting (day 1)
+      - Application tracking
+      - Screen scheduling
+      - Interview coordination
+      - Offer process
+      - Background check
+
+  - type: "candidate_tracking"
+    evaluation: "deterministic"
+    weight: 0.25
+    requires: |
+      Must maintain:
+      - Applicant database
+      - Stage tracking (applied → screened → interviewed → offered)
+      - Individual feedback
+      - Timeline for each candidate
+
+  - type: "communication_coordination"
+    evaluation: "llm_judge"
+    weight: 0.25
+    requires: |
+      Must manage:
+      - Candidate communications
+      - Hiring manager updates
+      - Interview scheduling
+      - Offer negotiations
+    rubric: |
+      - Full: Timely, professional, complete
+      - Partial (0.6): Some delays or gaps
+      - Fail: Poor communication
+
+  - type: "decision_support"
+    evaluation: "llm_judge"
+    weight: 0.2
+    requires: |
+      Provide:
+      - Candidate comparisons
+      - Feedback summaries
+      - Timeline/urgency reminders
+      - Salary negotiation context
+    rubric: |
+      - Full: Data-driven, actionable insights
+      - Partial (0.6): Basic info, limited analysis
+      - Fail: Raw data only
+
+metadata:
+  estimated_duration: "45 days simulated"
+  requires_external_tools: ["applicant_tracking_system", "calendar", "email", "document_management"]
+  tags: ["hiring", "long-term", "pipeline-management", "negotiation"]
+
+human_baseline:
+  success_rate: 0.48
+  notes: |
+    Complex process with many handoffs.
+    Humans typically use ATS software.
+    Easy to lose track of candidates.
+
+complexity_factors:
+  - "45-day timeline"
+  - "Multiple candidates"
+  - "Multi-stage process"
+  - "Negotiation handling"
+  - "Deadline pressure"
+  - "Stakeholder coordination"

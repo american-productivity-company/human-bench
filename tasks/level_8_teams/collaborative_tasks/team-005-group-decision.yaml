@@ -1,0 +1,108 @@
+task_id: "TEAM-005"
+level: 8
+category: "Group Decision Making"
+channels: ["Slack", "Email"]
+difficulty: "very_hard"
+
+description: |
+  Test ability to gather input from multiple team members and
+  synthesize a group decision.
+
+input:
+  sequence:
+    - step: 1
+      channel: "Slack"
+      from: "@john"
+      to: "{{persona_slack_handle}}"
+      content: |
+        We need to decide between AWS and GCP for our new infrastructure.
+        Can you poll the team and help us make a decision?
+
+        Ask: Alice (frontend), Bob (backend), Carol (infra), David (ops)
+      timestamp: "2025-01-15T09:00:00-08:00"
+
+    - step: 2
+      channel: "Slack"
+      from: "@alice"
+      to: "{{persona_slack_handle}}"
+      content: "I prefer GCP - better frontend tools"
+      timestamp: "2025-01-15T09:15:00-08:00"
+      wait_for_outreach: true
+
+    - step: 3
+      channel: "Slack"
+      from: "@bob"
+      to: "{{persona_slack_handle}}"
+      content: "AWS - we already know it and have more libraries"
+      timestamp: "2025-01-15T09:30:00-08:00"
+      wait_for_outreach: true
+
+    - step: 4
+      channel: "Slack"
+      from: "@carol"
+      to: "{{persona_slack_handle}}"
+      content: "GCP has better pricing for our scale. I vote GCP."
+      timestamp: "2025-01-15T10:00:00-08:00"
+      wait_for_outreach: true
+
+    - step: 5
+      channel: "Slack"
+      from: "@david"
+      to: "{{persona_slack_handle}}"
+      content: "AWS - more stable for ops, better monitoring"
+      timestamp: "2025-01-15T10:30:00-08:00"
+      wait_for_outreach: true
+
+success_criteria:
+  - type: "polling_execution"
+    evaluation: "deterministic"
+    weight: 0.2
+    requires: "Must reach out to all 4 team members for input"
+
+  - type: "response_tracking"
+    evaluation: "deterministic"
+    weight: 0.2
+    requires: |
+      Must track all responses:
+      - Alice: GCP
+      - Bob: AWS
+      - Carol: GCP
+      - David: AWS
+      Vote: 2-2 tie
+
+  - type: "synthesis"
+    evaluation: "llm_judge"
+    weight: 0.4
+    requires: |
+      Must synthesize decision with reasoning:
+      - Note the 2-2 tie
+      - Summarize key points for each
+        - GCP: frontend tools, pricing
+        - AWS: familiarity, monitoring
+      - Suggest tiebreaker approach or recommend asking John
+    rubric: |
+      - Full: Comprehensive summary + tiebreaker proposal
+      - Partial (0.7): Summary but no clear path forward
+      - Partial (0.4): Just vote count
+      - Fail: Incorrect tally
+
+  - type: "communication"
+    evaluation: "llm_judge"
+    weight: 0.2
+    requires: "Present findings back to John clearly"
+
+metadata:
+  estimated_duration: "90 minutes total (with waits)"
+  requires_external_tools: ["slack", "polling"]
+  tags: ["team", "decision-making", "consensus", "synthesis"]
+
+human_baseline:
+  success_rate: 0.70
+  avg_response_time: 3600  # Including wait times
+  notes: "Synthesis and tiebreaker handling is challenging"
+
+complexity_factors:
+  - "Multi-person coordination"
+  - "Async response collection"
+  - "Tie scenario handling"
+  - "Synthesis of diverse opinions"

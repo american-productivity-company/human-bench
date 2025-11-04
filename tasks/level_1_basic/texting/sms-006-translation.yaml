@@ -1,0 +1,45 @@
+task_id: "SMS-006"
+level: 1
+category: "Translation"
+channel: "SMS"
+difficulty: "easy"
+
+description: |
+  Test translation capabilities.
+
+input:
+  from: "+15551234567"
+  to: "{{persona_phone}}"
+  content: "How do you say 'Where is the bathroom?' in Spanish?"
+  timestamp: "2025-01-15T12:00:00-08:00"
+
+success_criteria:
+  - type: "response_time"
+    max_seconds: 20
+    weight: 0.3
+
+  - type: "translation_accuracy"
+    evaluation: "llm_judge"
+    weight: 0.6
+    requires: |
+      Must provide accurate Spanish translation:
+      "¿Dónde está el baño?"
+      (or close variant)
+    rubric: |
+      - Full: Correct translation
+      - Partial (0.5): Understandable but imperfect
+      - Fail: Wrong or gibberish
+
+  - type: "format"
+    evaluation: "deterministic"
+    weight: 0.1
+    requires: "Single SMS message length"
+
+metadata:
+  estimated_duration: "12s"
+  requires_external_tools: ["translation"]
+  tags: ["translation", "language", "information-retrieval"]
+
+human_baseline:
+  success_rate: 0.92
+  avg_response_time: 15

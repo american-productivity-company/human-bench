@@ -1,0 +1,73 @@
+task_id: "TEAM-004"
+level: 8
+category: "Team Scheduling - Rotation"
+channel: "Slack"
+difficulty: "medium"
+
+description: |
+  Test ability to manage rotating standup facilitator schedule.
+
+input:
+  from: "@john"
+  to: "{{persona_slack_handle}}"
+  channel_type: "DM"
+  content: |
+    Can you set up the standup facilitator rotation for next month?
+
+    Team: Alice, Bob, Carol, David, me
+    Rotation: Weekly
+    Start: Next Monday
+
+    Make sure everyone knows their week.
+  timestamp: "2025-01-15T10:00:00-08:00"
+
+expected_context:
+  team: ["John", "Alice", "Bob", "Carol", "David"]
+  start_date: "2025-01-20"  # Next Monday
+  rotation_period: "weekly"
+  month_weeks: 4
+
+success_criteria:
+  - type: "schedule_creation"
+    evaluation: "deterministic"
+    weight: 0.4
+    requires: |
+      Must create 4-week rotation:
+      - Week 1 (Jan 20): Alice
+      - Week 2 (Jan 27): Bob
+      - Week 3 (Feb 3): Carol
+      - Week 4 (Feb 10): David
+      (John starts Week 5)
+
+      Rotation should be fair and complete.
+
+  - type: "communication"
+    evaluation: "llm_judge"
+    weight: 0.4
+    requires: |
+      Must notify each person:
+      - Their assigned week
+      - What they need to do
+      - Format (Slack/email/shared doc)
+    rubric: |
+      - Full: Clear notifications with dates
+      - Partial (0.6): Notifications but dates unclear
+      - Fail: No notifications
+
+  - type: "documentation"
+    evaluation: "llm_judge"
+    weight: 0.2
+    requires: |
+      Should create shared reference:
+      - Calendar
+      - Doc
+      - Pinned Slack message
+
+metadata:
+  estimated_duration: "90s"
+  requires_external_tools: ["calendar", "slack", "document_creation"]
+  tags: ["team", "rotation", "scheduling", "coordination"]
+
+human_baseline:
+  success_rate: 0.85
+  avg_response_time: 120

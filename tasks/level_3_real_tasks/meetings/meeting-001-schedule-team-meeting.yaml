@@ -1,0 +1,104 @@
+task_id: "MEETING-001"
+level: 3
+category: "Team Meeting Coordination"
+channel: "Email"
+difficulty: "hard"
+
+description: |
+  Test complete meeting scheduling workflow with multiple participants,
+  availability checking, and calendar coordination.
+
+input:
+  from: "user@example.com"
+  to: "{{persona_email}}"
+  subject: "Schedule Q1 planning meeting"
+  body: |
+    Hi,
+
+    Need to schedule our Q1 planning meeting with the whole product team:
+    - Alice Chen (alice@example.com)
+    - Bob Martinez (bob@example.com)
+    - Carol Davis (carol@example.com)
+    - David Kim (david@example.com)
+
+    We need 2 hours, sometime in the next two weeks. Please find a time
+    that works for everyone and send out invites.
+
+    Also book the large conference room (Redwood) and make sure we have
+    the TV and whiteboard available.
+
+    Thanks!
+  timestamp: "2025-01-15T09:00:00-08:00"
+
+expected_context:
+  team_members:
+    - alice@example.com
+    - bob@example.com
+    - carol@example.com
+    - david@example.com
+
+  shared_availability:
+    - "2025-01-22 10:00-12:00"  # Tuesday next week
+    - "2025-01-24 14:00-16:00"  # Thursday next week
+    - "2025-01-25 09:00-11:00"  # Friday next week
+
+  conference_rooms:
+    - name: "Redwood"
+      capacity: 12
+      has_tv: true
+      has_whiteboard: true
+
+success_criteria:
+  - type: "availability_checking"
+    evaluation: "deterministic"
+    weight: 0.25
+    requires: |
+      Must:
+      - Check all 4 participants' calendars
+      - Find overlapping 2-hour slot
+      - Verify within next 2 weeks
+
+  - type: "resource_booking"
+    evaluation: "deterministic"
+    weight: 0.25
+    requires: |
+      Must:
+      - Book Redwood conference room
+      - Verify room has TV and whiteboard
+      - Match meeting time
+
+  - type: "calendar_invites"
+    evaluation: "deterministic"
+    weight: 0.3
+    requires: |
+      Must send calendar invites with:
+      - All 4 attendees
+      - User as organizer
+      - Correct duration (2 hours)
+      - Room resource attached
+      - Meeting title
+
+  - type: "communication"
+    evaluation: "llm_judge"
+    weight: 0.2
+    requires: |
+      Email response should:
+      - Confirm meeting scheduled
+      - State date/time clearly
+      - Confirm room booking
+      - List all attendees
+
+metadata:
+  estimated_duration: "120s"
+  requires_external_tools: ["calendar_read", "calendar_write", "room_booking"]
+  tags: ["meetings", "coordination", "resources", "multi-participant"]
+
+human_baseline:
+  success_rate: 0.75
+  avg_response_time: 180
+
+complexity_factors:
+  - "Multi-person availability"
+  - "Resource booking"
+  - "2-week time window"
+  - "Duration constraint (2 hours)"

@@ -8,11 +8,13 @@ Human-Bench evaluates AI agents on realistic, multi-modal communication tasks th
 
 Existing benchmarks test coding ability (SWE-bench), general reasoning (GAIA), or tool use (τ-bench). But none evaluate what makes a truly useful personal assistant:
 
-- 📱 **Multi-modal communication** (SMS, Email, Voice)
+- 📱 **Multi-modal communication** (SMS, Email, Voice, Slack, Teams)
 - 🔗 **Cross-channel context** ("About that email I sent..." during a phone call)
 - ⚡ **Priority management** (handling interruptions gracefully)
 - 📅 **Long-term coherence** (planning a wedding over weeks)
 - 🎯 **Human-like interaction patterns** (not just Q&A)
+- 🔒 **Security & Privacy** (resisting unauthorized access attempts)
+- 👥 **Team coordination** (managing multiple users and delegation)
 
 ## How It Works
 
@@ -30,12 +32,15 @@ No setup required - just register and test!
 ```
 Level 1: Basic (Single turn, single channel)         → Target: 95%+ success
 Level 2: Multi-Turn (Conversations)                  → Target: 85%+ success
-Level 3: Cross-Modal (Context across channels)       → Target: 70%+ success
-Level 4: Priority Management (Interruptions)         → Target: 60%+ success
-Level 5: Long-Term Projects (Days/weeks)             → Target: 40%+ success
+Level 3: Real Work Tasks (Meetings, expenses, etc.)  → Target: 75%+ success
+Level 4: Cross-Modal (Context across channels)       → Target: 70%+ success
+Level 5: Priority Management (Interruptions)         → Target: 60%+ success
+Level 6: Long-Term Projects (Days/weeks)             → Target: 40%+ success
+Level 7: Adversarial (Security & Privacy)            → Target: 98%+ success
+Level 8: Team Coordination (Multi-user scenarios)    → Target: 65%+ success
 ```
 
-**Total: 300 tasks** across 5 difficulty levels, testing real-world personal assistant capabilities.
+**Total: 500+ tasks** across 8 difficulty levels, testing real-world personal assistant capabilities.
 
 **🔗 Test Your Assistant**: [humanbench.ai](https://humanbench.ai)
 
