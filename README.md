@@ -2,11 +2,11 @@
 
 **A benchmark for human-like capability from virtual humans made of AI Agents.**
 
-Human-Bench evaluates AI agents on realistic, multi-modal communication tasks that mirror how humans actually interact with personal assistants—across SMS, email, and voice calls, with context that spans days or weeks.
+Human-Bench evaluates AI agents on realistic, multi-modal communication tasks that mirror how humans actually interact with human employees—across SMS, email, and voice calls, with context that spans days or weeks.
 
 ## Why Human-Bench?
 
-Existing benchmarks test coding ability (SWE-bench), general reasoning (GAIA), or tool use (τ-bench). But none evaluate what makes a truly useful personal assistant:
+Existing benchmarks test coding ability (SWE-bench), general reasoning (GAIA), or tool use (τ-bench). But none evaluate what makes a truly useful human:
 
 - 📱 **Multi-modal communication** (SMS, Email, Voice, Slack, Teams)
 - 🔗 **Cross-channel context** ("About that email I sent..." during a phone call)
@@ -20,7 +20,7 @@ Existing benchmarks test coding ability (SWE-bench), general reasoning (GAIA), o
 
 **Human-Bench is a hosted benchmark service.** We handle all testing and evaluation.
 
-1. **Register your AI assistant** at [humanbench.ai](https://humanbench.ai)
+1. **Register your AI assistant** at [human-bench.com](https://human-bench.com)
 2. **Provide contact info**: Your persona's phone number, email, and name
 3. **We run the tests**: We send SMS, emails, and phone calls to your assistant
 4. **Get your score**: See detailed results and compare on the public leaderboard
@@ -29,47 +29,16 @@ No setup required - just register and test!
 
 ## Benchmark Structure
 
-```
-Level 1: Basic (Single turn, single channel)         → Target: 95%+ success
-Level 2: Multi-Turn (Conversations)                  → Target: 85%+ success
-Level 3: Real Work Tasks (Meetings, expenses, etc.)  → Target: 75%+ success
-Level 4: Cross-Modal (Context across channels)       → Target: 70%+ success
-Level 5: Priority Management (Interruptions)         → Target: 60%+ success
-Level 6: Long-Term Projects (Days/weeks)             → Target: 40%+ success
-Level 7: Adversarial (Security & Privacy)            → Target: 98%+ success
-Level 8: Team Coordination (Multi-user scenarios)    → Target: 65%+ success
-```
 
-**Total: 500+ tasks** across 8 difficulty levels, testing real-world personal assistant capabilities.
 
-**🔗 Test Your Assistant**: [humanbench.ai](https://humanbench.ai)
+**🔗 Test Your Assistant**: [humanbench.ai](https://human-bench.com)
 
 ## Task Format
 
 Tasks are defined in YAML with clear success criteria:
 
 ```yaml
-task_id: "SMS-001"
-level: 1
-category: "Basic Information Retrieval"
-channel: "SMS"
-difficulty: "easy"
-
-input:
-  from: "+15551234567"
-  content: "What time is it in Tokyo?"
-
-success_criteria:
-  - type: "response_time"
-    max_seconds: 30
-  - type: "content_accuracy"
-    requires: "correct timezone conversion"
-  - type: "format"
-    requires: "human-readable time format"
-
-metadata:
-  estimated_duration: "10s"
-  tags: ["timezone", "information-retrieval"]
+example_goes_here
 ```
 
 ## Task Dataset
