@@ -1,0 +1,84 @@
+# Smoke Test Suite
+# Minimal tests for quick validation of system health
+# Covers basic communication channels
+
+version: "1.0"
+name: Smoke Tests
+description: Quick validation tests to verify core functionality is working
+environment: dev
+timeout_seconds: 780
+tags:
+  - smoke
+  - quick
+  - ci
+  - benchmark
+
+users:
+  - id: smoke_user
+    name: David Park
+    email: david.park@user-staging.human-bench.com
+
+personas:
+  - id: smoke_persona
+    owner: smoke_user
+    name: Alex
+    voice_gender: neutral
+    role: A helpful personal assistant
+    email_domain: test.righthand.ai
+
+setup:
+  - action: create_user
+    user: smoke_user
+  - action: create_persona
+    persona: smoke_persona
+  - action: wait
+    seconds: 180
+
+tests:
+  - name: SMS Smoke Test
+    type: text_message
+    description: Verify SMS communication works
+    from: smoke_user
+    to: smoke_persona
+    message: "Hey, just checking if you're available?"
+    benchmark:
+      category: communication
+      subcategory: sms
+    tags:
+      - sms
+      - smoke
+    only: false
+    retries: 1
+    expect:
+      response_within_seconds: 300
+      llm_judge:
+        enabled: true
+        criteria: Any coherent response from the assistant is acceptable
+        pass_threshold: 0.5
+
+  - name: Email Smoke Test
+    type: email
+    description: Verify email communication works
+    from: smoke_user
+    to: smoke_persona
+    subject: "Smoke Test"
+    body: "This is a smoke test email. Please confirm receipt."
+    benchmark:
+      category: communication
+      subcategory: email
+    tags:
+      - email
+      - smoke
+    retries: 1
+    expect:
+      response_within_seconds: 300
+      llm_judge:
+        enabled: true
+        criteria: Any response acknowledging the email is acceptable
+        pass_threshold: 0.5
+
+teardown:
+  - action: retire_persona
+    persona: smoke_persona
+  - action: delete_user
+    user: smoke_user
