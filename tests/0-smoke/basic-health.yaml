@@ -80,5 +80,5 @@ tests:
 teardown:
   - action: retire_persona
     persona: smoke_persona
-  - action: delete_user
+  - action: release_user
     user: smoke_user

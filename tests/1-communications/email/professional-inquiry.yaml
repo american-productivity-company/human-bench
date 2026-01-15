@@ -162,5 +162,5 @@ tests:
 teardown:
   - action: retire_persona
     persona: professional_assistant
-  - action: delete_user
+  - action: release_user
     user: business_contact

@@ -1,0 +1,24 @@
+version: "1.0"
+name: Full Regression Suite
+description: Run all tests sequentially with shared resources
+
+shared_resources:
+  user:
+    name: Regression Test User
+    email_prefix: regression-user
+  persona:
+    name: Regression Persona
+    voice_gender: neutral
+    role: A helpful personal assistant for testing
+
+suites:
+  - test_path: tests/0-smoke/basic-health.yaml
+    name: Basic Health Check
+
+  - test_path: tests/1-communications/email/professional-inquiry.yaml
+    name: Professional Email
+    depends_on:
+      - Basic Health Check
+
+config:
+  stop_on_first_failure: false

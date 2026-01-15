@@ -1,0 +1,19 @@
+version: "1.0"
+name: Smoke Test Suite
+description: Quick smoke tests with shared resources
+
+shared_resources:
+  user:
+    name: Smoke Test User
+    email_prefix: smoke-user
+  persona:
+    name: Smoke Persona
+    voice_gender: neutral
+    role: A helpful personal assistant for smoke testing
+
+suites:
+  - test_path: tests/0-smoke/basic-health.yaml
+    name: Basic Health Check
+
+config:
+  stop_on_first_failure: true
