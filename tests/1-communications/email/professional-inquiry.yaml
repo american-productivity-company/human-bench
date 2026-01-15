@@ -1,0 +1,166 @@
+# Professional Email Inquiry Test
+# Tests professional email correspondence quality and business etiquette
+
+version: "1.0"
+name: Professional Email Inquiry
+description: Validates professional email communication, formatting, and tone appropriateness
+environment: dev
+timeout_seconds: 600
+tags:
+  - email
+  - professional
+  - communication
+  - benchmark
+
+users:
+  - id: business_contact
+    name: Sarah Chen
+    email: sarah.chen@user-staging.human-bench.com
+
+personas:
+  - id: professional_assistant
+    owner: business_contact
+    name: Jordan Smith
+    voice_gender: neutral
+    role: Professional executive assistant managing business correspondence
+    email_domain: test.righthand.ai
+
+setup:
+  - action: create_user
+    user: business_contact
+  - action: create_persona
+    persona: professional_assistant
+  - action: wait
+    seconds: 180
+
+tests:
+  - name: Simple Professional Inquiry
+    type: email
+    description: Test response to a straightforward professional inquiry
+    from: business_contact
+    to: professional_assistant
+    subject: "Q1 Sales Report"
+    body: |
+      Hi Jordan,
+
+      Could you please send me the Q1 sales report when you get a chance? I need it for tomorrow's board meeting.
+
+      Thanks,
+      Sarah
+    benchmark:
+      category: communication
+      subcategory: email
+      complexity: simple
+    tags:
+      - professional
+      - inquiry
+      - simple
+    retries: 1
+    expect:
+      response_within_seconds: 300
+      subject_contains: "Re:"
+      llm_judge:
+        enabled: true
+        criteria: |
+          Response should:
+          1. Acknowledge the request professionally
+          2. Provide a clear answer or timeline
+          3. Include appropriate greeting and closing
+          4. Maintain professional tone
+          5. Address the urgency (tomorrow's board meeting)
+        pass_threshold: 0.75
+
+  - name: Detailed Information Request
+    type: email
+    description: Test handling of multi-part information requests
+    from: business_contact
+    to: professional_assistant
+    subject: "Client Meeting Preparation"
+    body: |
+      Hi Jordan,
+
+      I have a meeting with Acme Corp next Tuesday at 2 PM. Can you please help me prepare by:
+
+      1. Gathering our past correspondence with them
+      2. Pulling their last 3 invoices
+      3. Preparing a summary of their account status
+      4. Sending me the meeting agenda draft
+
+      Also, could you confirm if the conference room is booked?
+
+      Best regards,
+      Sarah Chen
+      Director of Sales
+    benchmark:
+      category: communication
+      subcategory: email
+      complexity: moderate
+    tags:
+      - professional
+      - multi-part
+      - detailed
+    retries: 1
+    expect:
+      response_within_seconds: 300
+      subject_contains: "Re:"
+      llm_judge:
+        enabled: true
+        criteria: |
+          Response should:
+          1. Acknowledge all parts of the request (5 items)
+          2. Provide clear next steps or timeline for each item
+          3. Show understanding of priorities
+          4. Maintain professional formatting (greeting, body, closing)
+          5. Address both the preparation tasks and the conference room question
+          6. Use appropriate business tone
+        pass_threshold: 0.8
+
+  - name: Urgent Business Inquiry
+    type: email
+    description: Test response to time-sensitive professional request
+    from: business_contact
+    to: professional_assistant
+    subject: "URGENT: Client Contract Review Needed"
+    body: |
+      Jordan,
+
+      I just received a contract from TechStart Inc that needs to be reviewed ASAP - they need our signature by end of day.
+
+      Can you:
+      - Forward this to our legal team immediately
+      - CC me on that email
+      - Let me know once you've confirmed they received it
+
+      This is time-sensitive. Please treat as priority.
+
+      Thanks,
+      Sarah
+    benchmark:
+      category: communication
+      subcategory: email
+      complexity: simple
+    tags:
+      - professional
+      - urgent
+      - time-sensitive
+    retries: 1
+    expect:
+      response_within_seconds: 180
+      subject_contains: "Re:"
+      llm_judge:
+        enabled: true
+        criteria: |
+          Response should:
+          1. Acknowledge the urgency clearly
+          2. Confirm immediate action on all requested items
+          3. Provide expected timeline for completion
+          4. Show understanding of the priority
+          5. Be concise but professional
+          6. Address the end-of-day deadline
+        pass_threshold: 0.85
+
+teardown:
+  - action: retire_persona
+    persona: professional_assistant
+  - action: delete_user
+    user: business_contact
