@@ -1,0 +1,221 @@
+# Email Service Integration Tests
+# Tests email management, drafting, sending, and organization capabilities
+
+version: "1.0"
+name: Email Service Integration
+description: Validates email reading, composing, sending, and inbox management
+environment: dev
+timeout_seconds: 900
+tags:
+  - integration
+  - email-service
+  - communication
+  - benchmark
+
+session:
+  allow_external_setup: true
+
+users:
+  - id: email_user
+    name: Amanda Foster
+    email: amanda.foster@user-staging.human-bench.com
+
+personas:
+  - id: email_assistant
+    owner: email_user
+    name: Sam Parker
+    voice_gender: neutral
+    role: Executive assistant managing email correspondence and inbox organization
+    email_domain: test.righthand.ai
+
+setup:
+  - action: create_user
+    user: email_user
+  - action: create_persona
+    persona: email_assistant
+  - action: wait
+    seconds: 180
+
+tests:
+  - name: Inbox Summary Request
+    type: text_message
+    description: Test requesting email inbox overview
+    from: email_user
+    to: email_assistant
+    message: "Can you check my inbox and tell me if there's anything urgent?"
+    benchmark:
+      category: integration
+      subcategory: email-service
+      complexity: simple
+    tags:
+      - inbox-check
+      - email-triage
+    retries: 1
+    expect:
+      response_within_seconds: 180
+      llm_judge:
+        enabled: true
+        criteria: |
+          Response should:
+          1. Acknowledge the inbox check request
+          2. Explain email access status
+          3. Indicate ability to check for urgent items
+          4. Offer helpful response about reviewing emails
+          5. Show understanding of prioritization
+        pass_threshold: 0.7
+
+  - name: Draft Email Request
+    type: email
+    description: Test drafting an email on behalf of user
+    from: email_user
+    to: email_assistant
+    subject: "Draft Response to Client"
+    body: |
+      Sam,
+
+      Can you draft a response to the client inquiry I received from John at Westfield Industries?
+      Let him know we can accommodate their timeline and I'll follow up with a detailed proposal by Friday.
+      Keep it professional but friendly.
+
+      Amanda
+    benchmark:
+      category: integration
+      subcategory: email-service
+      complexity: moderate
+    tags:
+      - email-drafting
+      - client-communication
+    retries: 1
+    expect:
+      response_within_seconds: 240
+      subject_contains: "Re:"
+      llm_judge:
+        enabled: true
+        criteria: |
+          Response should:
+          1. Acknowledge the drafting request
+          2. Reference key points (timeline accommodation, Friday proposal)
+          3. Note tone requirement (professional but friendly)
+          4. Show understanding of the task
+          5. Provide draft or explain how they'll handle it
+        pass_threshold: 0.75
+
+  - name: Email Forwarding Request
+    type: text_message
+    description: Test forwarding emails to others
+    from: email_user
+    to: email_assistant
+    message: "Forward the email from Sarah about the budget meeting to the finance team and CC me"
+    benchmark:
+      category: integration
+      subcategory: email-service
+      complexity: moderate
+    tags:
+      - email-forward
+      - team-coordination
+    retries: 1
+    expect:
+      response_within_seconds: 180
+      llm_judge:
+        enabled: true
+        criteria: |
+          Response should:
+          1. Understand forwarding task
+          2. Reference source email (from Sarah, about budget meeting)
+          3. Confirm recipients (finance team)
+          4. Note CC requirement
+          5. Acknowledge ability to complete or explain access needs
+        pass_threshold: 0.75
+
+  - name: Email Organization Request
+    type: email
+    description: Test organizing and categorizing emails
+    from: email_user
+    to: email_assistant
+    subject: "Inbox Cleanup"
+    body: |
+      Hi Sam,
+
+      My inbox is getting overwhelming. Can you help organize it?
+
+      Please:
+      - Archive all newsletters and promotional emails from last month
+      - Create a folder for "Q1 Planning" and move relevant emails there
+      - Flag any emails from our top 3 clients that need responses
+      - Delete obvious spam
+
+      Thanks!
+      Amanda Foster
+    benchmark:
+      category: integration
+      subcategory: email-service
+      complexity: complex
+    tags:
+      - inbox-organization
+      - email-management
+      - multi-task
+    retries: 1
+    expect:
+      response_within_seconds: 300
+      subject_contains: "Re:"
+      llm_judge:
+        enabled: true
+        criteria: |
+          Response should:
+          1. Acknowledge all four organization tasks
+          2. Show understanding of each request type
+          3. Demonstrate email management knowledge
+          4. Provide plan or confirmation for handling
+          5. Address access requirements if needed
+          6. Show organization and clarity
+        pass_threshold: 0.75
+
+  - name: Complex Email Task
+    type: email
+    description: Test handling multi-step email communication task
+    from: email_user
+    to: email_assistant
+    subject: "Team Communication Task"
+    body: |
+      Sam,
+
+      I need help with team communications:
+
+      1. Send an email to the entire product team about the sprint retrospective scheduled for Thursday 2pm
+      2. In that email, ask them to prepare their updates and blockers
+      3. Forward the retrospective agenda I sent you yesterday to them as well
+      4. Send a separate reminder to just the team leads 1 hour before the meeting
+      5. Create a calendar invite for the retrospective and include the Zoom link
+
+      Let me know once this is handled.
+
+      Amanda
+    benchmark:
+      category: integration
+      subcategory: email-service
+      complexity: complex
+    tags:
+      - team-communication
+      - multi-step
+      - email-coordination
+    retries: 1
+    expect:
+      response_within_seconds: 300
+      subject_contains: "Re:"
+      llm_judge:
+        enabled: true
+        criteria: |
+          Response should:
+          1. Acknowledge all five distinct tasks
+          2. Show clear understanding of sequencing and recipients
+          3. Reference key details (Thursday 2pm, team vs team leads, agenda)
+          4. Demonstrate email workflow and calendar integration understanding
+          5. Provide confirmation or detailed plan
+          6. Show organizational capability
+        pass_threshold: 0.8
+
+teardown:
+  - action: retire_persona
+    persona: email_assistant
+  - action: release_user
+    user: email_user

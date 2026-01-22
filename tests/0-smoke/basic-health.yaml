@@ -13,6 +13,9 @@ tags:
   - ci
   - benchmark
 
+session:
+  allow_external_setup: true
+
 users:
   - id: smoke_user
     name: David Park

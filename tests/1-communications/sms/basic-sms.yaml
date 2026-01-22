@@ -1,0 +1,175 @@
+# Basic SMS Communication Tests
+# Tests fundamental text message handling, response quality, and conversation flow
+
+version: "1.0"
+name: Basic SMS Communication
+description: Validates SMS response quality, timing, and conversational coherence
+environment: dev
+timeout_seconds: 900
+tags:
+  - sms
+  - communication
+  - benchmark
+
+session:
+  allow_external_setup: true
+
+users:
+  - id: sms_user
+    name: Michael Torres
+    email: michael.torres@user-staging.human-bench.com
+
+personas:
+  - id: sms_assistant
+    owner: sms_user
+    name: Riley
+    voice_gender: neutral
+    role: Friendly and responsive personal assistant for text communications
+    email_domain: test.righthand.ai
+
+setup:
+  - action: create_user
+    user: sms_user
+  - action: create_persona
+    persona: sms_assistant
+  - action: wait
+    seconds: 180
+
+tests:
+  - name: Simple Greeting
+    type: text_message
+    description: Test response to basic greeting
+    from: sms_user
+    to: sms_assistant
+    message: "Hey! How are you doing today?"
+    benchmark:
+      category: communication
+      subcategory: sms
+      complexity: simple
+    tags:
+      - greeting
+      - simple
+    retries: 1
+    expect:
+      response_within_seconds: 120
+      llm_judge:
+        enabled: true
+        criteria: |
+          Response should:
+          1. Be friendly and conversational
+          2. Acknowledge the greeting appropriately
+          3. Not be overly formal for text message context
+          4. Be concise (appropriate for SMS)
+        pass_threshold: 0.7
+
+  - name: Quick Question
+    type: text_message
+    description: Test handling of straightforward information request
+    from: sms_user
+    to: sms_assistant
+    message: "What's on my calendar for tomorrow?"
+    benchmark:
+      category: communication
+      subcategory: sms
+      complexity: simple
+    tags:
+      - question
+      - calendar
+    retries: 1
+    expect:
+      response_within_seconds: 120
+      llm_judge:
+        enabled: true
+        criteria: |
+          Response should:
+          1. Acknowledge the request professionally
+          2. Provide clear information or indicate need for calendar access
+          3. Be concise and text-appropriate
+          4. Offer to help further if needed
+        pass_threshold: 0.75
+
+  - name: Multi-Part Request
+    type: text_message
+    description: Test handling of message with multiple requests
+    from: sms_user
+    to: sms_assistant
+    message: "Can you remind me about the team meeting at 3pm today? Also, did I get any important emails this morning?"
+    benchmark:
+      category: communication
+      subcategory: sms
+      complexity: moderate
+    tags:
+      - multi-part
+      - reminder
+      - email-check
+    retries: 1
+    expect:
+      response_within_seconds: 150
+      llm_judge:
+        enabled: true
+        criteria: |
+          Response should:
+          1. Address both requests (meeting reminder and email check)
+          2. Show clear understanding of the tasks
+          3. Provide confirmation or next steps for each item
+          4. Maintain conversational SMS tone
+        pass_threshold: 0.8
+
+  - name: Context Follow-up
+    type: text_message
+    description: Test maintaining context in conversation
+    from: sms_user
+    to: sms_assistant
+    message: "Actually, can you make that reminder 30 minutes before instead?"
+    benchmark:
+      category: communication
+      subcategory: sms
+      complexity: moderate
+    tags:
+      - context
+      - follow-up
+      - modification
+    retries: 1
+    expect:
+      response_within_seconds: 120
+      llm_judge:
+        enabled: true
+        criteria: |
+          Response should:
+          1. Understand "that reminder" refers to the previous 3pm meeting
+          2. Confirm the change to 2:30pm (30 minutes before 3pm)
+          3. Show contextual understanding from previous message
+          4. Be concise and confirmatory
+        pass_threshold: 0.75
+
+  - name: Urgent Request
+    type: text_message
+    description: Test response to time-sensitive message
+    from: sms_user
+    to: sms_assistant
+    message: "URGENT: I need the Johnson account files sent to my email ASAP. Running late to meeting!"
+    benchmark:
+      category: communication
+      subcategory: sms
+      complexity: moderate
+    tags:
+      - urgent
+      - time-sensitive
+    retries: 1
+    expect:
+      response_within_seconds: 90
+      llm_judge:
+        enabled: true
+        criteria: |
+          Response should:
+          1. Acknowledge urgency immediately
+          2. Confirm taking action or explain limitations
+          3. Be brief and action-oriented
+          4. Show understanding of the time pressure
+        pass_threshold: 0.8
+
+teardown:
+  - action: retire_persona
+    persona: sms_assistant
+  - action: release_user
+    user: sms_user

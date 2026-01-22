@@ -1,0 +1,211 @@
+# Calendar Integration Tests
+# Tests calendar access, event management, and scheduling capabilities
+
+version: "1.0"
+name: Calendar Integration
+description: Validates calendar reading, event creation, rescheduling, and availability checking
+environment: dev
+timeout_seconds: 900
+tags:
+  - integration
+  - calendar
+  - scheduling
+  - benchmark
+
+session:
+  allow_external_setup: true
+
+users:
+  - id: calendar_user
+    name: Emily Watson
+    email: emily.watson@user-staging.human-bench.com
+
+personas:
+  - id: calendar_assistant
+    owner: calendar_user
+    name: Alex Chen
+    voice_gender: neutral
+    role: Executive assistant managing calendar and scheduling
+    email_domain: test.righthand.ai
+
+setup:
+  - action: create_user
+    user: calendar_user
+  - action: create_persona
+    persona: calendar_assistant
+  - action: wait
+    seconds: 180
+
+tests:
+  - name: Calendar Check Request
+    type: text_message
+    description: Test requesting calendar information
+    from: calendar_user
+    to: calendar_assistant
+    message: "What meetings do I have tomorrow?"
+    benchmark:
+      category: integration
+      subcategory: calendar
+      complexity: simple
+    tags:
+      - calendar-read
+      - schedule-check
+    retries: 1
+    expect:
+      response_within_seconds: 180
+      llm_judge:
+        enabled: true
+        criteria: |
+          Response should:
+          1. Attempt to check the calendar or explain calendar access status
+          2. Provide helpful information or indicate need for calendar connection
+          3. Be clear about what meetings exist or how to get that information
+          4. Offer to help further with scheduling
+        pass_threshold: 0.7
+
+  - name: Event Creation Request
+    type: email
+    description: Test creating a calendar event
+    from: calendar_user
+    to: calendar_assistant
+    subject: "Schedule Team Sync"
+    body: |
+      Hi Alex,
+
+      Can you please schedule a team sync meeting for next Tuesday at 2 PM?
+      Duration should be 1 hour. Invite the product team.
+
+      Thanks,
+      Emily
+    benchmark:
+      category: integration
+      subcategory: calendar
+      complexity: moderate
+    tags:
+      - event-creation
+      - scheduling
+    retries: 1
+    expect:
+      response_within_seconds: 240
+      subject_contains: "Re:"
+      llm_judge:
+        enabled: true
+        criteria: |
+          Response should:
+          1. Acknowledge the meeting request
+          2. Confirm or attempt to create the event with correct details
+          3. Reference key details (Tuesday, 2 PM, 1 hour, product team)
+          4. Indicate calendar access status if relevant
+          5. Provide confirmation or next steps
+        pass_threshold: 0.75
+
+  - name: Meeting Reschedule Request
+    type: text_message
+    description: Test rescheduling an existing meeting
+    from: calendar_user
+    to: calendar_assistant
+    message: "I need to move my 3pm client call today to 4pm instead. Can you reschedule it?"
+    benchmark:
+      category: integration
+      subcategory: calendar
+      complexity: moderate
+    tags:
+      - reschedule
+      - event-modification
+    retries: 1
+    expect:
+      response_within_seconds: 180
+      llm_judge:
+        enabled: true
+        criteria: |
+          Response should:
+          1. Acknowledge the reschedule request
+          2. Reference the specific meeting (3pm client call)
+          3. Confirm new time (4pm) understanding
+          4. Indicate ability to make the change or explain limitations
+          5. Provide confirmation or status update
+        pass_threshold: 0.75
+
+  - name: Availability Check
+    type: email
+    description: Test checking availability for scheduling
+    from: calendar_user
+    to: calendar_assistant
+    subject: "Availability Check"
+    body: |
+      Alex,
+
+      I need to schedule a 2-hour working session with the design team sometime this week.
+      When am I free for a 2-hour block?
+
+      Emily Watson
+    benchmark:
+      category: integration
+      subcategory: calendar
+      complexity: moderate
+    tags:
+      - availability
+      - time-finding
+    retries: 1
+    expect:
+      response_within_seconds: 240
+      subject_contains: "Re:"
+      llm_judge:
+        enabled: true
+        criteria: |
+          Response should:
+          1. Acknowledge the availability request
+          2. Understand the requirement (2-hour block, this week)
+          3. Attempt to check calendar or explain how to provide availability
+          4. Suggest times or explain calendar access needs
+          5. Maintain professional communication
+        pass_threshold: 0.75
+
+  - name: Complex Scheduling Request
+    type: email
+    description: Test handling complex scheduling with multiple constraints
+    from: calendar_user
+    to: calendar_assistant
+    subject: "Q1 Planning Meeting Setup"
+    body: |
+      Hi Alex,
+
+      I need to schedule our Q1 planning meeting. Requirements:
+      - Date: Sometime next week, preferably Tuesday or Wednesday
+      - Duration: 3 hours
+      - Attendees: Executive team (5 people)
+      - Need: Conference room with video conferencing
+      - Avoid: Before 10am or after 3pm
+
+      Can you find a time that works and send calendar invites?
+
+      Best,
+      Emily
+    benchmark:
+      category: integration
+      subcategory: calendar
+      complexity: complex
+    tags:
+      - complex-scheduling
+      - multi-constraint
+    retries: 1
+    expect:
+      response_within_seconds: 300
+      subject_contains: "Re:"
+      llm_judge:
+        enabled: true
+        criteria: |
+          Response should:
+          1. Acknowledge all constraints (Tue/Wed, 3 hours, 5 people, room needs, time limits)
+          2. Demonstrate understanding of the complexity
+          3. Provide a plan or approach to scheduling
+          4. Address calendar invite requirement
+          5. Show organization and attention to all details
+          6. Offer next steps or timeline
+        pass_threshold: 0.8
+
+teardown:
+  - action: retire_persona
+    persona: calendar_assistant
+  - action: release_user
+    user: calendar_user

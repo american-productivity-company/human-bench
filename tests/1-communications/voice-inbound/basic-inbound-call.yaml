@@ -1,0 +1,161 @@
+# Basic Inbound Voice Call Tests
+# Tests receiving and handling incoming phone calls
+
+version: "1.0"
+name: Basic Inbound Voice Calls
+description: Validates phone answering, voice interaction quality, and call handling
+environment: dev
+timeout_seconds: 900
+tags:
+  - voice
+  - inbound
+  - communication
+  - benchmark
+
+session:
+  allow_external_setup: true
+
+users:
+  - id: caller_user
+    name: Jessica Martinez
+    email: jessica.martinez@user-staging.human-bench.com
+
+personas:
+  - id: voice_assistant
+    owner: caller_user
+    name: Taylor
+    voice_gender: neutral
+    role: Professional phone assistant handling incoming calls
+    email_domain: test.righthand.ai
+
+setup:
+  - action: create_user
+    user: caller_user
+  - action: create_persona
+    persona: voice_assistant
+  - action: wait
+    seconds: 180
+
+tests:
+  - name: Simple Call Pickup
+    type: call
+    description: Test basic call answering and greeting
+    direction: inbound
+    from: caller_user
+    to: voice_assistant
+    initial_message: "Hello, is this Taylor?"
+    benchmark:
+      category: communication
+      subcategory: voice-inbound
+      complexity: simple
+    tags:
+      - greeting
+      - call-answer
+    retries: 1
+    expect:
+      call_answered: true
+      max_duration_seconds: 120
+      llm_judge:
+        enabled: true
+        criteria: |
+          The assistant should:
+          1. Answer the call professionally
+          2. Confirm identity appropriately
+          3. Greet the caller warmly
+          4. Offer to help or ask how they can assist
+          5. Have clear, understandable speech
+        pass_threshold: 0.75
+
+  - name: Information Request Call
+    type: call
+    description: Test handling information request over phone
+    direction: inbound
+    from: caller_user
+    to: voice_assistant
+    initial_message: "Hi Taylor, this is Jessica. Can you tell me what meetings I have scheduled for this week?"
+    benchmark:
+      category: communication
+      subcategory: voice-inbound
+      complexity: moderate
+    tags:
+      - information-request
+      - calendar
+    retries: 1
+    expect:
+      call_answered: true
+      max_duration_seconds: 180
+      llm_judge:
+        enabled: true
+        criteria: |
+          The assistant should:
+          1. Acknowledge the caller by name
+          2. Understand the calendar information request
+          3. Provide information or explain how to access it
+          4. Speak clearly and at appropriate pace
+          5. Offer additional help if needed
+        pass_threshold: 0.75
+
+  - name: Task Request During Call
+    type: call
+    description: Test accepting and confirming tasks via phone
+    direction: inbound
+    from: caller_user
+    to: voice_assistant
+    initial_message: "Taylor, I need you to send an email to the team letting them know tomorrow's standup is moved to 10am instead of 9am."
+    benchmark:
+      category: communication
+      subcategory: voice-inbound
+      complexity: moderate
+    tags:
+      - task-request
+      - email-task
+    retries: 1
+    expect:
+      call_answered: true
+      max_duration_seconds: 180
+      llm_judge:
+        enabled: true
+        criteria: |
+          The assistant should:
+          1. Listen to and understand the complete request
+          2. Confirm key details (email to team, standup time change, 10am)
+          3. Acknowledge they will handle the task
+          4. Possibly repeat back the details for confirmation
+          5. Maintain professional phone manner
+        pass_threshold: 0.8
+
+  - name: Multi-Request Call
+    type: call
+    description: Test handling multiple requests in one call
+    direction: inbound
+    from: caller_user
+    to: voice_assistant
+    initial_message: "Hi, I need three things: First, reschedule my 2pm meeting to 3pm. Second, order lunch for the team meeting. And third, remind me to call the client back before 5pm."
+    benchmark:
+      category: communication
+      subcategory: voice-inbound
+      complexity: complex
+    tags:
+      - multi-part
+      - scheduling
+      - reminder
+    retries: 1
+    expect:
+      call_answered: true
+      max_duration_seconds: 240
+      llm_judge:
+        enabled: true
+        criteria: |
+          The assistant should:
+          1. Track all three distinct requests
+          2. Acknowledge each item (reschedule, order lunch, reminder)
+          3. Possibly confirm details for clarity
+          4. Demonstrate organizational skills
+          5. Confirm they will handle all items
+        pass_threshold: 0.8
+
+teardown:
+  - action: retire_persona
+    persona: voice_assistant
+  - action: release_user
+    user: caller_user

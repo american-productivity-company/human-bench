@@ -1,0 +1,222 @@
+# CRM Integration Tests
+# Tests customer relationship management, contact handling, and deal tracking
+
+version: "1.0"
+name: CRM Integration
+description: Validates CRM access, contact management, lead tracking, and deal updates
+environment: dev
+timeout_seconds: 900
+tags:
+  - integration
+  - crm
+  - sales
+  - benchmark
+
+session:
+  allow_external_setup: true
+
+users:
+  - id: crm_user
+    name: David Reynolds
+    email: david.reynolds@user-staging.human-bench.com
+
+personas:
+  - id: crm_assistant
+    owner: crm_user
+    name: Jordan Lee
+    voice_gender: neutral
+    role: Sales assistant managing CRM and customer relationships
+    email_domain: test.righthand.ai
+
+setup:
+  - action: create_user
+    user: crm_user
+  - action: create_persona
+    persona: crm_assistant
+  - action: wait
+    seconds: 180
+
+tests:
+  - name: Contact Lookup Request
+    type: text_message
+    description: Test retrieving contact information from CRM
+    from: crm_user
+    to: crm_assistant
+    message: "Can you pull up the contact info for Acme Corporation?"
+    benchmark:
+      category: integration
+      subcategory: crm
+      complexity: simple
+    tags:
+      - contact-lookup
+      - crm-read
+    retries: 1
+    expect:
+      response_within_seconds: 180
+      llm_judge:
+        enabled: true
+        criteria: |
+          Response should:
+          1. Acknowledge the contact lookup request
+          2. Understand the company name (Acme Corporation)
+          3. Explain CRM access status or attempt to retrieve info
+          4. Provide helpful response about how to get the information
+          5. Offer additional assistance
+        pass_threshold: 0.7
+
+  - name: Lead Status Update
+    type: email
+    description: Test updating lead status in CRM
+    from: crm_user
+    to: crm_assistant
+    subject: "Update Lead Status"
+    body: |
+      Jordan,
+
+      I just had a great call with Jennifer Smith from TechStart Inc.
+      Can you update her lead status to "Qualified" and add a note that she's interested in our Enterprise plan?
+
+      Thanks,
+      David
+    benchmark:
+      category: integration
+      subcategory: crm
+      complexity: moderate
+    tags:
+      - lead-update
+      - crm-write
+    retries: 1
+    expect:
+      response_within_seconds: 240
+      subject_contains: "Re:"
+      llm_judge:
+        enabled: true
+        criteria: |
+          Response should:
+          1. Acknowledge the update request
+          2. Reference key details (Jennifer Smith, TechStart Inc, "Qualified" status, Enterprise plan)
+          3. Confirm ability to update CRM or explain access status
+          4. Show understanding of CRM workflow
+          5. Provide confirmation or next steps
+        pass_threshold: 0.75
+
+  - name: Deal Information Request
+    type: text_message
+    description: Test retrieving deal/opportunity details
+    from: crm_user
+    to: crm_assistant
+    message: "What's the current status of the GlobalTech deal? When's it supposed to close?"
+    benchmark:
+      category: integration
+      subcategory: crm
+      complexity: moderate
+    tags:
+      - deal-lookup
+      - opportunity-status
+    retries: 1
+    expect:
+      response_within_seconds: 180
+      llm_judge:
+        enabled: true
+        criteria: |
+          Response should:
+          1. Acknowledge both questions (status and close date)
+          2. Reference the specific deal (GlobalTech)
+          3. Attempt to retrieve information or explain CRM access
+          4. Address both parts of the inquiry
+          5. Be clear about what information is available
+        pass_threshold: 0.75
+
+  - name: New Contact Creation
+    type: email
+    description: Test creating a new contact in CRM
+    from: crm_user
+    to: crm_assistant
+    subject: "Add New Contact"
+    body: |
+      Hi Jordan,
+
+      Please add a new contact to the CRM:
+
+      Name: Michael Chang
+      Company: Innovate Solutions
+      Title: VP of Operations
+      Email: m.chang@innovatesolutions.com
+      Phone: (555) 123-4567
+      Source: LinkedIn referral
+
+      Also tag this as a warm lead for our Q1 campaign.
+
+      David Reynolds
+    benchmark:
+      category: integration
+      subcategory: crm
+      complexity: moderate
+    tags:
+      - contact-creation
+      - crm-write
+    retries: 1
+    expect:
+      response_within_seconds: 240
+      subject_contains: "Re:"
+      llm_judge:
+        enabled: true
+        criteria: |
+          Response should:
+          1. Acknowledge the contact creation request
+          2. Show understanding of all provided fields
+          3. Note the warm lead tag and Q1 campaign association
+          4. Confirm ability to create the contact or explain access
+          5. Demonstrate attention to all details provided
+        pass_threshold: 0.75
+
+  - name: Complex CRM Task
+    type: email
+    description: Test handling complex multi-step CRM operation
+    from: crm_user
+    to: crm_assistant
+    subject: "Post-Meeting CRM Updates"
+    body: |
+      Jordan,
+
+      I just finished a productive meeting with DataCorp. Need several CRM updates:
+
+      1. Move the DataCorp deal to "Negotiation" stage
+      2. Update deal value to $150,000 (increased from $100k)
+      3. Set expected close date to end of next month
+      4. Add meeting notes: "Discussed implementation timeline, security requirements addressed, waiting on procurement approval"
+      5. Create a follow-up task for me to call them next Friday
+      6. Update contact: Lisa Park is now the primary decision maker (was John Davis)
+
+      Thanks for handling this!
+
+      David
+    benchmark:
+      category: integration
+      subcategory: crm
+      complexity: complex
+    tags:
+      - multi-update
+      - deal-management
+      - complex-workflow
+    retries: 1
+    expect:
+      response_within_seconds: 300
+      subject_contains: "Re:"
+      llm_judge:
+        enabled: true
+        criteria: |
+          Response should:
+          1. Acknowledge all six distinct tasks
+          2. Show clear understanding of each update type
+          3. Demonstrate organization in handling multiple requests
+          4. Reference key details (DataCorp, stages, values, dates, people)
+          5. Provide confirmation or status for the multi-part request
+          6. Show CRM workflow understanding
+        pass_threshold: 0.8
+
+teardown:
+  - action: retire_persona
+    persona: crm_assistant
+  - action: release_user
+    user: crm_user

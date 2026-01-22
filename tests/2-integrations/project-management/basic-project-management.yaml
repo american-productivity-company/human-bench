@@ -1,0 +1,224 @@
+# Project Management Integration Tests
+# Tests task management, project tracking, and team coordination capabilities
+
+version: "1.0"
+name: Project Management Integration
+description: Validates task creation, status tracking, project updates, and team collaboration
+environment: dev
+timeout_seconds: 900
+tags:
+  - integration
+  - project-management
+  - tasks
+  - benchmark
+
+session:
+  allow_external_setup: true
+
+users:
+  - id: pm_user
+    name: Rachel Morrison
+    email: rachel.morrison@user-staging.human-bench.com
+
+personas:
+  - id: pm_assistant
+    owner: pm_user
+    name: Drew Martinez
+    voice_gender: neutral
+    role: Project coordinator managing tasks, deadlines, and team workflows
+    email_domain: test.righthand.ai
+
+setup:
+  - action: create_user
+    user: pm_user
+  - action: create_persona
+    persona: pm_assistant
+  - action: wait
+    seconds: 180
+
+tests:
+  - name: Task Creation Request
+    type: text_message
+    description: Test creating a simple task
+    from: pm_user
+    to: pm_assistant
+    message: "Create a task: Review design mockups for homepage redesign. Assign to me. Due Friday."
+    benchmark:
+      category: integration
+      subcategory: project-management
+      complexity: simple
+    tags:
+      - task-creation
+      - pm-write
+    retries: 1
+    expect:
+      response_within_seconds: 180
+      llm_judge:
+        enabled: true
+        criteria: |
+          Response should:
+          1. Acknowledge task creation request
+          2. Confirm key details (design mockups review, assigned to user, Friday due date)
+          3. Show understanding of task management
+          4. Indicate ability to create or explain access status
+          5. Provide confirmation
+        pass_threshold: 0.75
+
+  - name: Project Status Request
+    type: email
+    description: Test requesting project status update
+    from: pm_user
+    to: pm_assistant
+    subject: "Website Redesign Status"
+    body: |
+      Drew,
+
+      Can you give me a status update on the website redesign project?
+      What tasks are completed, what's in progress, and are we on track for the March 15th launch?
+
+      Rachel Morrison
+    benchmark:
+      category: integration
+      subcategory: project-management
+      complexity: moderate
+    tags:
+      - project-status
+      - progress-tracking
+    retries: 1
+    expect:
+      response_within_seconds: 240
+      subject_contains: "Re:"
+      llm_judge:
+        enabled: true
+        criteria: |
+          Response should:
+          1. Acknowledge the status request for website redesign
+          2. Address all three questions (completed, in progress, on track)
+          3. Reference the March 15th deadline
+          4. Explain ability to access project data
+          5. Provide helpful status information or next steps
+        pass_threshold: 0.75
+
+  - name: Task Assignment and Delegation
+    type: text_message
+    description: Test assigning tasks to team members
+    from: pm_user
+    to: pm_assistant
+    message: "Assign a task to Sarah: 'Write user documentation for new features'. Priority: High. Due next Wednesday. Add it to the Documentation project."
+    benchmark:
+      category: integration
+      subcategory: project-management
+      complexity: moderate
+    tags:
+      - task-assignment
+      - delegation
+      - team-coordination
+    retries: 1
+    expect:
+      response_within_seconds: 180
+      llm_judge:
+        enabled: true
+        criteria: |
+          Response should:
+          1. Acknowledge task assignment request
+          2. Reference all details (Sarah, documentation task, High priority, Wednesday, Documentation project)
+          3. Show understanding of delegation workflow
+          4. Confirm ability to assign or explain access
+          5. Provide clear confirmation
+        pass_threshold: 0.75
+
+  - name: Overdue Task Check
+    type: email
+    description: Test identifying overdue or at-risk tasks
+    from: pm_user
+    to: pm_assistant
+    subject: "Overdue Tasks Check"
+    body: |
+      Hi Drew,
+
+      Can you check which tasks in the Mobile App project are overdue or at risk of missing their deadlines?
+      I need to know who's responsible and what's blocking them.
+
+      Thanks,
+      Rachel
+    benchmark:
+      category: integration
+      subcategory: project-management
+      complexity: moderate
+    tags:
+      - overdue-tasks
+      - risk-management
+      - blocking-issues
+    retries: 1
+    expect:
+      response_within_seconds: 240
+      subject_contains: "Re:"
+      llm_judge:
+        enabled: true
+        criteria: |
+          Response should:
+          1. Acknowledge the overdue/at-risk check request
+          2. Reference the Mobile App project specifically
+          3. Address both questions (who's responsible, blockers)
+          4. Show understanding of project health monitoring
+          5. Explain how to get that information or provide status
+        pass_threshold: 0.75
+
+  - name: Complex Project Management Task
+    type: email
+    description: Test handling comprehensive project coordination
+    from: pm_user
+    to: pm_assistant
+    subject: "Q1 Product Launch - Coordination Needed"
+    body: |
+      Drew,
+
+      I need help coordinating our Q1 product launch. Please handle the following:
+
+      1. Create a new project called "Q1 Product Launch"
+      2. Add all tasks from the old "Beta Testing" project to this new project
+      3. Create milestone tasks:
+         - Marketing assets ready (Feb 28)
+         - Sales training complete (March 5)
+         - Technical docs finalized (March 10)
+         - Launch event (March 15)
+      4. Assign the marketing tasks to the Marketing team
+      5. Set up a weekly status meeting recurring every Monday at 10am
+      6. Generate a Gantt chart view showing all dependencies
+      7. Send project invite to the executive team as stakeholders
+
+      This is our most important Q1 initiative, so accuracy is critical.
+
+      Rachel Morrison
+      VP of Product
+    benchmark:
+      category: integration
+      subcategory: project-management
+      complexity: complex
+    tags:
+      - project-setup
+      - milestone-tracking
+      - team-coordination
+      - multi-task
+    retries: 1
+    expect:
+      response_within_seconds: 300
+      subject_contains: "Re:"
+      llm_judge:
+        enabled: true
+        criteria: |
+          Response should:
+          1. Acknowledge all seven distinct tasks
+          2. Show understanding of project hierarchy and structure
+          3. Reference key dates and milestones correctly
+          4. Demonstrate project management tool knowledge
+          5. Show awareness of importance and need for accuracy
+          6. Provide organized response or action plan
+          7. Address stakeholder involvement
+        pass_threshold: 0.8
+
+teardown:
+  - action: retire_persona
+    persona: pm_assistant
+  - action: release_user
+    user: pm_user

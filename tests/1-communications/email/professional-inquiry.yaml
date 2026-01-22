@@ -12,6 +12,9 @@ tags:
   - communication
   - benchmark
 
+session:
+  allow_external_setup: true
+
 users:
   - id: business_contact
     name: Sarah Chen

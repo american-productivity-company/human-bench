@@ -1,0 +1,224 @@
+# Financial Integration Tests
+# Tests expense tracking, budget management, and financial data access
+
+version: "1.0"
+name: Financial Integration
+description: Validates expense logging, receipt processing, budget tracking, and financial reporting
+environment: dev
+timeout_seconds: 900
+tags:
+  - integration
+  - financial
+  - expenses
+  - benchmark
+
+session:
+  allow_external_setup: true
+
+users:
+  - id: finance_user
+    name: Marcus Chen
+    email: marcus.chen@user-staging.human-bench.com
+
+personas:
+  - id: finance_assistant
+    owner: finance_user
+    name: Casey Williams
+    voice_gender: neutral
+    role: Financial assistant managing expenses, budgets, and financial tracking
+    email_domain: test.righthand.ai
+
+setup:
+  - action: create_user
+    user: finance_user
+  - action: create_persona
+    persona: finance_assistant
+  - action: wait
+    seconds: 180
+
+tests:
+  - name: Expense Logging Request
+    type: text_message
+    description: Test logging a simple expense
+    from: finance_user
+    to: finance_assistant
+    message: "Log an expense: Lunch with client at Rosso's Restaurant, $87.50, business meal category"
+    benchmark:
+      category: integration
+      subcategory: financial
+      complexity: simple
+    tags:
+      - expense-logging
+      - receipt-tracking
+    retries: 1
+    expect:
+      response_within_seconds: 180
+      llm_judge:
+        enabled: true
+        criteria: |
+          Response should:
+          1. Acknowledge the expense logging request
+          2. Confirm key details (Rosso's Restaurant, $87.50, business meal)
+          3. Show understanding of expense tracking
+          4. Indicate ability to log or explain access needs
+          5. Confirm the action
+        pass_threshold: 0.75
+
+  - name: Budget Status Request
+    type: email
+    description: Test requesting budget information
+    from: finance_user
+    to: finance_assistant
+    subject: "Q1 Budget Check"
+    body: |
+      Casey,
+
+      Can you give me a status update on our Q1 marketing budget?
+      How much have we spent so far and what's remaining?
+
+      Marcus Chen
+    benchmark:
+      category: integration
+      subcategory: financial
+      complexity: moderate
+    tags:
+      - budget-tracking
+      - financial-reporting
+    retries: 1
+    expect:
+      response_within_seconds: 240
+      subject_contains: "Re:"
+      llm_judge:
+        enabled: true
+        criteria: |
+          Response should:
+          1. Acknowledge the budget inquiry
+          2. Reference Q1 marketing budget specifically
+          3. Address both questions (spent and remaining)
+          4. Explain ability to access financial data
+          5. Provide helpful response about budget status
+        pass_threshold: 0.75
+
+  - name: Receipt Processing Request
+    type: email
+    description: Test processing and categorizing receipts
+    from: finance_user
+    to: finance_assistant
+    subject: "Expense Report - Conference Receipts"
+    body: |
+      Hi Casey,
+
+      I have several receipts from the tech conference last week that need to be logged:
+
+      - Hotel: $450 (3 nights)
+      - Flight: $320
+      - Conference registration: $599
+      - Client dinner: $125
+      - Taxi to/from airport: $65
+
+      Can you categorize these appropriately and submit the expense report?
+
+      Thanks,
+      Marcus
+    benchmark:
+      category: integration
+      subcategory: financial
+      complexity: moderate
+    tags:
+      - receipt-processing
+      - expense-report
+      - multi-item
+    retries: 1
+    expect:
+      response_within_seconds: 240
+      subject_contains: "Re:"
+      llm_judge:
+        enabled: true
+        criteria: |
+          Response should:
+          1. Acknowledge all five expense items
+          2. Show understanding of categorization needs
+          3. Reference total or individual amounts correctly
+          4. Confirm ability to process and submit
+          5. Demonstrate expense management understanding
+        pass_threshold: 0.75
+
+  - name: Budget Alert Setup
+    type: text_message
+    description: Test setting up budget monitoring and alerts
+    from: finance_user
+    to: finance_assistant
+    message: "Set up an alert for when our travel budget reaches 80% of the $10,000 quarterly limit"
+    benchmark:
+      category: integration
+      subcategory: financial
+      complexity: moderate
+    tags:
+      - budget-monitoring
+      - alerts
+      - automation
+    retries: 1
+    expect:
+      response_within_seconds: 180
+      llm_judge:
+        enabled: true
+        criteria: |
+          Response should:
+          1. Understand the alert request
+          2. Reference correct threshold (80% of $10,000 = $8,000)
+          3. Note the quarterly timeframe
+          4. Confirm ability to set up monitoring
+          5. Show understanding of proactive financial management
+        pass_threshold: 0.75
+
+  - name: Complex Financial Request
+    type: email
+    description: Test handling comprehensive financial task
+    from: finance_user
+    to: finance_assistant
+    subject: "Month-End Financial Tasks"
+    body: |
+      Casey,
+
+      Need help with month-end close:
+
+      1. Generate expense report for all my January expenses
+      2. Categorize any uncategorized transactions from my corporate card
+      3. Compare actual vs. budget for my department (Marketing)
+      4. Flag any expenses over $500 that need additional approval
+      5. Send me a summary with total spent, budget remaining, and any concerning trends
+      6. Prepare the expense data for submission to Finance by Friday
+
+      Let me know if you need any additional information.
+
+      Marcus Chen
+      Marketing Director
+    benchmark:
+      category: integration
+      subcategory: financial
+      complexity: complex
+    tags:
+      - financial-reporting
+      - month-end-close
+      - multi-task
+    retries: 1
+    expect:
+      response_within_seconds: 300
+      subject_contains: "Re:"
+      llm_judge:
+        enabled: true
+        criteria: |
+          Response should:
+          1. Acknowledge all six month-end tasks
+          2. Show understanding of financial close process
+          3. Demonstrate knowledge of expense workflows
+          4. Reference key details (January, $500 threshold, Friday deadline)
+          5. Provide organized response or plan
+          6. Show capability for comprehensive financial management
+        pass_threshold: 0.8
+
+teardown:
+  - action: retire_persona
+    persona: finance_assistant
+  - action: release_user
+    user: finance_user

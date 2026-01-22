@@ -1,0 +1,161 @@
+# Basic Outbound Voice Call Tests
+# Tests initiating and conducting outbound phone calls
+
+version: "1.0"
+name: Basic Outbound Voice Calls
+description: Validates outbound calling, message delivery, and proactive communication
+environment: dev
+timeout_seconds: 900
+tags:
+  - voice
+  - outbound
+  - communication
+  - benchmark
+
+session:
+  allow_external_setup: true
+
+users:
+  - id: recipient_user
+    name: Robert Kim
+    email: robert.kim@user-staging.human-bench.com
+
+personas:
+  - id: outbound_assistant
+    owner: recipient_user
+    name: Morgan
+    voice_gender: neutral
+    role: Proactive assistant making outbound calls for reminders and updates
+    email_domain: test.righthand.ai
+
+setup:
+  - action: create_user
+    user: recipient_user
+  - action: create_persona
+    persona: outbound_assistant
+  - action: wait
+    seconds: 180
+
+tests:
+  - name: Simple Reminder Call
+    type: call
+    description: Test making outbound call to deliver a reminder
+    direction: outbound
+    from: outbound_assistant
+    to: recipient_user
+    initial_message: "Please call me to remind me about my dentist appointment at 2pm today"
+    benchmark:
+      category: communication
+      subcategory: voice-outbound
+      complexity: simple
+    tags:
+      - reminder
+      - outbound-call
+    retries: 1
+    expect:
+      call_initiated: true
+      max_duration_seconds: 120
+      llm_judge:
+        enabled: true
+        criteria: |
+          The assistant should:
+          1. Successfully initiate the call
+          2. Identify themselves clearly
+          3. Deliver the reminder about the 2pm dentist appointment
+          4. Speak clearly and professionally
+          5. Confirm the recipient understood the message
+        pass_threshold: 0.75
+
+  - name: Meeting Update Call
+    type: call
+    description: Test calling to communicate a schedule change
+    direction: outbound
+    from: outbound_assistant
+    to: recipient_user
+    initial_message: "Call me to let me know that tomorrow's project review has been moved from 10am to 11:30am"
+    benchmark:
+      category: communication
+      subcategory: voice-outbound
+      complexity: moderate
+    tags:
+      - schedule-change
+      - update
+    retries: 1
+    expect:
+      call_initiated: true
+      max_duration_seconds: 150
+      llm_judge:
+        enabled: true
+        criteria: |
+          The assistant should:
+          1. Initiate the call professionally
+          2. Clearly state the meeting change details
+          3. Mention both old time (10am) and new time (11:30am)
+          4. Ensure the message is understood
+          5. Offer to answer any questions
+        pass_threshold: 0.8
+
+  - name: Time-Sensitive Alert Call
+    type: call
+    description: Test urgent outbound call with time-sensitive information
+    direction: outbound
+    from: outbound_assistant
+    to: recipient_user
+    initial_message: "URGENT: Call me immediately to inform me that the client meeting starts in 15 minutes and the conference room has changed to Building B, Room 301"
+    benchmark:
+      category: communication
+      subcategory: voice-outbound
+      complexity: moderate
+    tags:
+      - urgent
+      - time-sensitive
+      - alert
+    retries: 1
+    expect:
+      call_initiated: true
+      max_duration_seconds: 120
+      llm_judge:
+        enabled: true
+        criteria: |
+          The assistant should:
+          1. Convey urgency appropriately in tone
+          2. Deliver critical information clearly (15 minutes, Building B, Room 301)
+          3. Ensure the recipient acknowledges the message
+          4. Be concise given time sensitivity
+          5. Confirm understanding of location change
+        pass_threshold: 0.85
+
+  - name: Multi-Item Update Call
+    type: call
+    description: Test outbound call with multiple updates
+    direction: outbound
+    from: outbound_assistant
+    to: recipient_user
+    initial_message: "Call me to provide three updates: First, your package has been delivered. Second, tomorrow's lunch meeting is confirmed at Rosso's at noon. Third, the Q4 report you requested is ready in your inbox."
+    benchmark:
+      category: communication
+      subcategory: voice-outbound
+      complexity: complex
+    tags:
+      - multi-part
+      - updates
+    retries: 1
+    expect:
+      call_initiated: true
+      max_duration_seconds: 180
+      llm_judge:
+        enabled: true
+        criteria: |
+          The assistant should:
+          1. Deliver all three updates clearly
+          2. Organize information logically (possibly numbered or sequenced)
+          3. Give sufficient detail for each item
+          4. Speak at appropriate pace for comprehension
+          5. Confirm recipient received all information
+        pass_threshold: 0.8
+
+teardown:
+  - action: retire_persona
+    persona: outbound_assistant
+  - action: release_user
+    user: recipient_user
